@@ -246,7 +246,7 @@ function ledger(){
     if(!pts.length)return;
     var lo=Math.min.apply(null,pts),hi=Math.max.apply(null,pts),sw=76,sh=20,d='';
     pts.forEach(function(v,i){var x=pts.length>1?i/(pts.length-1)*sw:sw/2,y=hi===lo?sh/2:sh-(v-lo)/(hi-lo)*(sh-4)-2;d+=(i?'L':'M')+x.toFixed(1)+' '+y.toFixed(1)});
-    var lx=pts.length>1?sw:sw/2,ly=hi===lo?sh/2:2;var dl=pts[pts.length-1]-pts[0];
+    var lx=pts.length>1?sw:sw/2,ly=hi===lo?sh/2:sh-(pts[pts.length-1]-lo)/(hi-lo)*(sh-4)-2;var dl=pts[pts.length-1]-pts[0];
     rows+='<div class="exr"><span class="n">'+EX[id].n+'</span><svg viewBox="0 0 '+sw+' '+sh+'" style="height:'+sh+'px" aria-hidden="true"><path d="'+d+'" fill="none" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/><circle cx="'+lx+'" cy="'+ly+'" r="2.5" fill="#fff"/></svg><span class="v"><b>'+num(pts[pts.length-1])+'</b> <small>'+(dl>0?'+':dl<0?'−':'±')+num(Math.abs(dl))+'</small></span></div>';
   });
   h+='<section class="panel"><div class="hd"><span class="lbl">weight / exercise</span><span class="lbl">kg · Δ since genesis</span></div><div>'+rows+'</div></section>';
