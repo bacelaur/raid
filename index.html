@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>RAID</title>
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="RAID">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-512.png">
+<style>
+:root{
+  --bg:#000;--fg:#e8e7e2;--hi:#fff;--mute:#6b6a65;--line:#232321;--c2:#4a4a46;--red:#e3262f;
+  --d:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',Arial,sans-serif;
+  --m:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--fg);font:13px/1.45 var(--m);-webkit-font-smoothing:antialiased;-webkit-user-select:none;user-select:none}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+:focus-visible{outline:1px solid var(--hi);outline-offset:2px}
+.app{max-width:520px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 18px) max(18px,env(safe-area-inset-right)) calc(env(safe-area-inset-bottom) + 120px) max(18px,env(safe-area-inset-left));display:flex;flex-direction:column;gap:26px}
+
+.top{display:flex;justify-content:space-between;align-items:baseline;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--mute)}
+.abst{display:flex;align-items:baseline;gap:10px}
+.abst b{color:var(--hi);font-weight:500}
+.abst button{border:1px solid var(--line);padding:3px 8px;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--mute)}
+.abst button.arm{border-color:var(--red);color:var(--red)}
+
+.mast h1{margin:0;font:800 clamp(44px,15vw,72px)/.88 var(--d);letter-spacing:-.035em;color:var(--hi)}
+.mast h1 span{font-weight:200;color:var(--mute)}
+.mast .tx{margin-top:10px;font-size:10px;letter-spacing:.16em;color:var(--mute);text-transform:uppercase}
+.mast .tx b{color:var(--fg);font-weight:500}
+
+.prog{height:2px;background:var(--line);position:relative}
+.prog i{position:absolute;inset:0 auto 0 0;background:var(--hi);transition:width .3s}
+
+.ex{display:flex;flex-direction:column;gap:12px;padding-top:18px;border-top:1px solid var(--line)}
+.ex .nm{font:700 15px/1.2 var(--d);text-transform:uppercase;letter-spacing:.01em;color:var(--hi)}
+.rx{display:flex;align-items:baseline;gap:14px}
+.rx .w{font:800 40px/1 var(--d);letter-spacing:-.03em;color:var(--hi);font-variant-numeric:tabular-nums}
+.rx .w small{font:400 10px var(--m);letter-spacing:.16em;color:var(--mute);margin-left:5px}
+.rx .r{font:200 26px/1 var(--d);color:var(--fg)}
+.rx .cal{margin-left:auto;display:flex;gap:4px}
+.rx .cal button{width:30px;height:28px;border:1px solid var(--line);color:var(--mute)}
+.why{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--mute)}
+.why.dn{color:var(--red)}
+.sets{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.sb{height:64px;border:1px solid var(--c2);font:700 22px/1 var(--d)}
+.sb.ok{background:var(--hi);color:var(--bg);border-color:var(--hi)}
+.sb.no{border-color:var(--red);color:var(--red)}
+
+.end{padding:22px 0;border-top:1px solid var(--line);font:700 13px/1.4 var(--d);letter-spacing:.06em;text-transform:uppercase;color:var(--hi)}
+.end small{display:block;font:400 10px/1.6 var(--m);letter-spacing:.14em;color:var(--mute);margin-top:6px}
+
+.timer{position:fixed;left:0;right:0;bottom:0;z-index:5;background:var(--hi);color:#000;padding:14px max(18px,env(safe-area-inset-right)) calc(env(safe-area-inset-bottom) + 14px) max(18px,env(safe-area-inset-left))}
+.timer[hidden]{display:none}
+.timer .in{max-width:520px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.timer .t{font:800 34px/1 var(--d);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.timer .l{font-size:9px;letter-spacing:.2em;text-transform:uppercase}
+.timer .b{display:flex;gap:6px}
+.timer .b button{border:1px solid #000;padding:8px 10px;font-size:11px}
+.timer.go{background:var(--red);color:#fff}
+.timer.go .b button{border-color:#fff}
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+<div class="timer" id="timer" hidden><div class="in">
+  <div><div class="l" id="tl">отдых</div><div class="t" id="tt">2:30</div></div>
+  <div class="b"><button data-a="tm">−15</button><button data-a="tp">+15</button><button data-a="ts">×</button></div>
+</div></div>
+<script>
+(function(){
+'use strict';
+var KEY='raid.v2';
+var PLAN={
+  A:[
+    {id:'bench',n:'Жим штанги лёжа',s:3,r:8,rest:150,w0:30,st:2.5},
+    {id:'row',n:'Тяга штанги в наклоне',s:3,r:10,rest:150,w0:30,st:2.5},
+    {id:'squat',n:'Присед или жим ногами',s:3,r:10,rest:150,w0:40,st:2.5},
+    {id:'dbpress',n:'Жим гантелей сидя',s:2,r:12,rest:120,w0:10,st:1,db:1},
+    {id:'curl',n:'Сгибания на бицепс',s:2,r:12,rest:105,w0:8,st:1,db:1},
+    {id:'pushdown',n:'Разгибания на трицепс, блок',s:2,r:12,rest:105,w0:15,st:2.5}
+  ],
+  B:[
+    {id:'incline',n:'Жим гантелей на наклонной',s:3,r:10,rest:150,w0:10,st:1,db:1},
+    {id:'pulldown',n:'Верхний блок к груди',s:3,r:10,rest:150,w0:35,st:2.5},
+    {id:'rdl',n:'Румынская тяга',s:3,r:10,rest:150,w0:40,st:2.5},
+    {id:'cablerow',n:'Тяга горизонтального блока',s:2,r:12,rest:120,w0:30,st:2.5},
+    {id:'hammer',n:'Молотки',s:2,r:12,rest:105,w0:8,st:1,db:1},
+    {id:'french',n:'Французский жим',s:2,r:12,rest:105,w0:15,st:2.5}
+  ]
+};
+
+function pad(n){return String(n).padStart(2,'0')}
+function today(){var d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
+function days(a,b){var p=function(k){var x=k.split('-');return new Date(+x[0],x[1]-1,+x[2])};return Math.round((p(b)-p(a))/864e5)}
+function num(x){return String(x).replace('.',',')}
+
+var S;
+try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+if(!S||!S.log)S={log:[],abst:{start:today(),best:0}};
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+
+/* незакрытая тренировка прошлого дня закрывается: неотмеченное = провал */
+(function close(){
+  var L=S.log[S.log.length-1];
+  if(L&&!L.done&&L.d<today()){
+    PLAN[L.t].forEach(function(x){var e=L.ex[x.id];if(!e)return;for(var i=0;i<x.s;i++)if(e.s[i]!==1)e.s[i]=0});
+    L.done=true;save();
+  }
+})();
+
+function current(){var L=S.log[S.log.length-1];return L&&!L.done?L:null}
+function nextType(){var L=S.log[S.log.length-1];return L?(L.t==='A'?'B':'A'):'A'}
+function hist(id,upto){
+  var out=[];
+  for(var i=upto-1;i>=0;i--){var e=S.log[i].ex[id];if(e&&e.s.some(function(v){return v===1||v===0}))out.push(e)}
+  return out;
+}
+function passed(x,e){for(var i=0;i<x.s;i++)if(e.s[i]!==1)return false;return true}
+function rnd(v,st){return Math.max(st,Math.round(v/st)*st)}
+/* законы веса: закрыл всё → +шаг; провал → тот же; два провала подряд → −10% */
+function rx(x,idx){
+  var cur=idx<S.log.length?S.log[idx].ex[x.id]:null;
+  if(cur&&typeof cur.cal==='number')return {w:cur.cal,why:'калибровка'};
+  var h=hist(x.id,idx);
+  if(!h.length)return {w:x.w0,why:'стартовый вес'};
+  if(passed(x,h[0]))return {w:+(h[0].w+x.st).toFixed(1),why:'прошлый раз закрыт · +'+num(x.st)+' кг'};
+  if(h[1]&&!passed(x,h[1])&&h[1].w===h[0].w)return {w:rnd(h[0].w*.9,x.st),why:'два провала подряд · −10%',dn:1};
+  return {w:h[0].w,why:'прошлый раз провал · тот же вес'};
+}
+function fnv(s){var h=0x811c9dc5;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0}return ('0000000'+h.toString(16)).slice(-8)}
+
+var armed=0;
+function render(){
+  var cur=current(),idx=cur?S.log.length-1:S.log.length,t=cur?cur.t:nextType(),plan=PLAN[t];
+  var blk=idx+1,ad=Math.max(0,days(S.abst.start,today()));
+  var marked=0,total=0,fails=0;
+  plan.forEach(function(x){total+=x.s;var e=cur&&cur.ex[x.id];if(e)e.s.forEach(function(v){if(v===1||v===0)marked++;if(v===0)fails++})});
+  var h='<div class="top"><span>raid</span><span class="abst">uptime <b>'+ad+'d</b>'+(S.abst.best>ad?'<span>max '+S.abst.best+'d</span>':'')+
+    '<button data-a="ab" class="'+(armed?'arm':'')+'">'+(armed?'confirm':'reset')+'</button></span></div>';
+  var tx=fnv(blk+'|'+t)+fnv('raid'+blk*7919);
+  h+='<header class="mast"><h1>BLOCK <span>0x'+blk.toString(16).toUpperCase().padStart(4,'0')+'</span></h1>'+
+     '<div class="tx">тренировка <b>'+t+'</b> · txhash <b>0x'+tx.slice(0,8)+'…'+tx.slice(-6)+'</b></div></header>';
+  h+='<div class="prog"><i style="width:'+(marked/total*100)+'%"></i></div>';
+  plan.forEach(function(x){
+    var p=rx(x,idx),e=cur&&cur.ex[x.id],started=e&&e.s.some(function(v){return v===1||v===0});
+    h+='<section class="ex"><div class="nm">'+x.n+'</div><div class="rx"><span class="w">'+num(p.w)+'<small>кг'+(x.db?' ×2':'')+'</small></span><span class="r">'+x.s+'×'+x.r+'</span>'+
+      (started?'':'<span class="cal"><button data-a="c" data-x="'+x.id+'" data-d="-1" aria-label="легче">−</button><button data-a="c" data-x="'+x.id+'" data-d="1" aria-label="тяжелее">+</button></span>')+
+      '</div><div class="why'+(p.dn?' dn':'')+'">'+p.why+'</div><div class="sets">';
+    for(var i=0;i<x.s;i++){var v=e?e.s[i]:null;h+='<button class="sb'+(v===1?' ok':v===0?' no':'')+'" data-a="s" data-x="'+x.id+'" data-i="'+i+'">'+(v===1?'✓':v===0?'✗':(i+1))+'</button>'}
+    h+='</div></section>';
+  });
+  h+='<div class="end">'+(marked===0?'Протокол задан. Исполняй.':marked<total?'Блок в работе · '+marked+'/'+total:'')+
+     '<small>✓ — все повторы с чистой техникой. Второй тап — ✗. Закрыл всё — следующий раз тяжелее.</small></div>';
+  document.getElementById('app').innerHTML=h;
+}
+
+function ensure(){
+  var cur=current();if(cur)return cur;
+  cur={d:today(),t:nextType(),ex:{},done:false};S.log.push(cur);return cur;
+}
+function finishIfDone(cur){
+  var all=PLAN[cur.t].every(function(x){var e=cur.ex[x.id];if(!e)return false;for(var i=0;i<x.s;i++)if(e.s[i]!==1&&e.s[i]!==0)return false;return true});
+  if(all){cur.done=true;return true}return false;
+}
+
+/* таймер */
+var end=0,iv=null,rang=false,lock=null;
+function beep(){try{var C=window.AudioContext||window.webkitAudioContext,a=new C(),o=a.createOscillator(),g=a.createGain();o.frequency.value=880;o.connect(g);g.connect(a.destination);g.gain.setValueAtTime(.2,a.currentTime);g.gain.exponentialRampToValueAtTime(.0001,a.currentTime+.7);o.start();o.stop(a.currentTime+.7)}catch(e){}if(navigator.vibrate)navigator.vibrate([200,80,200])}
+function tick(){var s=Math.round((end-Date.now())/1000),el=document.getElementById('timer'),a=Math.abs(s);
+  document.getElementById('tt').textContent=(s<0?'+':'')+Math.floor(a/60)+':'+pad(a%60);
+  if(s<=0){el.classList.add('go');document.getElementById('tl').textContent='подход';if(!rang){rang=true;beep()}}}
+function timer(sec){end=Date.now()+sec*1000;rang=false;var el=document.getElementById('timer');el.hidden=false;el.classList.remove('go');document.getElementById('tl').textContent='отдых';clearInterval(iv);iv=setInterval(tick,250);tick();awake()}
+function stop(){clearInterval(iv);document.getElementById('timer').hidden=true}
+async function awake(){try{if(!lock&&navigator.wakeLock){lock=await navigator.wakeLock.request('screen');lock.addEventListener('release',function(){lock=null})}}catch(e){}}
+
+document.addEventListener('click',function(ev){
+  var b=ev.target.closest('[data-a]');if(!b)return;var a=b.dataset.a;
+  if(a==='s'||a==='c'){
+    var cur=ensure(),idx=S.log.length-1,x=PLAN[cur.t].find(function(q){return q.id===b.dataset.x}),p=rx(x,idx);
+    var e=cur.ex[x.id]||(cur.ex[x.id]={w:p.w,s:[]});
+    if(a==='c'){var nw=+(p.w+x.st*(+b.dataset.d)).toFixed(1);if(nw>=x.st){e.cal=nw;e.w=nw}save();render();return}
+    var i=+b.dataset.i,v=e.s[i];e.w=p.w;e.s[i]=v===1?0:v===0?null:1;
+    var fin=finishIfDone(cur);save();render();
+    if(fin)stop();else if(e.s[i]!==null)timer(x.rest);
+    return;
+  }
+  if(a==='ab'){
+    if(!armed){armed=1;render();setTimeout(function(){armed=0;render()},3000);return}
+    var ad=Math.max(0,days(S.abst.start,today()));S.abst.best=Math.max(S.abst.best||0,ad);S.abst.start=today();armed=0;save();render();return;
+  }
+  if(a==='tm'){end-=15000;tick();return}
+  if(a==='tp'){end+=15000;tick();return}
+  if(a==='ts'){stop();return}
+});
+document.addEventListener('visibilitychange',function(){if(!document.hidden)render()});
+render();
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});
+})();
+</script>
+</body>
+</html>
