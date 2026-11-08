@@ -1,5 +1,7 @@
-const V = 'raid-v4';
-const FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-180.png', 'icon-512.png'];
+const V = 'raid-v5';
+const FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-180.png', 'icon-512.png',
+  'fonts/clash-display-500.woff2', 'fonts/clash-display-600.woff2', 'fonts/general-sans-400.woff2',
+  'fonts/general-sans-500.woff2', 'fonts/manrope-cyrillic-variable.woff2', 'fonts/unbounded-cyrillic-variable.woff2'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(V).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
 });

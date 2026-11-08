@@ -2,9 +2,9 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover,user-scalable=no">
 <title>RAID</title>
-<meta name="theme-color" content="#000000">
+<meta name="theme-color" content="#050506">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -13,161 +13,200 @@
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" href="icon-512.png">
 <style>
+@font-face{font-family:'Clash Display';src:url(fonts/clash-display-500.woff2) format('woff2');font-weight:500;font-display:swap}
+@font-face{font-family:'Clash Display';src:url(fonts/clash-display-600.woff2) format('woff2');font-weight:600;font-display:swap}
+@font-face{font-family:'General Sans';src:url(fonts/general-sans-400.woff2) format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:'General Sans';src:url(fonts/general-sans-500.woff2) format('woff2');font-weight:500;font-display:swap}
+@font-face{font-family:'Unbounded';size-adjust:78%;src:url(fonts/unbounded-cyrillic-variable.woff2) format('woff2');font-weight:200 900;font-display:swap;unicode-range:U+0400-045F,U+2116}
+@font-face{font-family:'Manrope';src:url(fonts/manrope-cyrillic-variable.woff2) format('woff2');font-weight:200 800;font-display:swap;unicode-range:U+0400-045F,U+2116}
+/* Токены сайта bacelaur.com: ink / bone / muted, матовые плашки с волосяной верхней гранью. */
 :root{
-  --bg:#000;--fg:#d9d8d2;--hi:#fff;--mute:#64635e;--line:#1f1f1d;--c2:#45453f;--red:#e3262f;
-  --m:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+  --ink:#050506;--bone:#ebe9e4;--bone-rgb:235 233 228;--muted:#a8a6a1;--dim:#5d5c58;--red:#e3262f;
+  --panel:rgb(10 10 13 / .72);--edge-t:rgb(var(--bone-rgb) / .12);--edge-b:rgb(var(--bone-rgb) / .05);
+  --shadow:0 28px 66px -34px rgb(0 0 0 / .88);
+  --disp:'Clash Display','Unbounded',system-ui,sans-serif;
+  --body:'General Sans','Manrope',system-ui,sans-serif;
+  --mono:ui-monospace,'SF Mono',Menlo,monospace;
   color-scheme:dark;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;background:var(--bg);color:var(--fg);font:12px/1.5 var(--m);-webkit-font-smoothing:antialiased;-webkit-user-select:none;user-select:none}
-body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:50;background:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,transparent 1px 3px)}
-button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
-:focus-visible{outline:1px solid var(--hi);outline-offset:2px}
-.app{max-width:520px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 16px) max(18px,env(safe-area-inset-right)) calc(env(safe-area-inset-bottom) + 150px) max(18px,env(safe-area-inset-left));display:flex;flex-direction:column;gap:22px}
-.lbl{font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--mute)}
-b{color:var(--hi);font-weight:600}
+/* Каркас без position:fixed: прокручивается только #scroll, нижняя панель стоит в потоке — на iOS home screen она не прыгает. */
+html,body{height:100%;margin:0;overflow:hidden;touch-action:manipulation;background:var(--ink)}
+body{display:flex;flex-direction:column;color:var(--bone);font:14px/1.5 var(--body);-webkit-font-smoothing:antialiased;-webkit-user-select:none;user-select:none;
+  background:radial-gradient(130% 70% at 50% 0%,#0c0c10 0%,#07070a 46%,#050506 100%) var(--ink)}
+#scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+footer{flex:none}
+button,input{font:inherit;color:inherit;background:none;border:0;padding:0;touch-action:manipulation}
+button{cursor:pointer}
+:focus-visible{outline:1px solid var(--bone);outline-offset:2px}
+.app{max-width:540px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 14px) max(14px,env(safe-area-inset-right)) 28px max(14px,env(safe-area-inset-left));display:flex;flex-direction:column;gap:10px}
 
-.top{display:flex;justify-content:space-between;align-items:center;font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--mute)}
-.top .r{display:flex;gap:8px;align-items:center}
-.top button{border:1px solid var(--line);padding:3px 7px;letter-spacing:.18em}
-.top button.arm{border-color:var(--red);color:var(--red)}
-
-.sh{font-size:11px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sh i{color:var(--hi);font-style:normal}
-.caret{display:inline-block;width:7px;height:12px;background:var(--hi);vertical-align:-2px;margin-left:2px;animation:bl 1s steps(1) infinite}
+.plate{background:var(--panel);border-top:1px solid var(--edge-t);border-bottom:1px solid var(--edge-b);box-shadow:var(--shadow);padding:18px 18px 20px;display:flex;flex-direction:column;gap:12px}
+.eb{font:500 10px/1.4 var(--body);letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}
+.mono{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.mono b,.eb b{color:var(--bone);font-weight:500}
+.caret{display:inline-block;width:7px;height:12px;background:var(--bone);vertical-align:-2px;margin-left:2px;animation:bl 1s steps(1) infinite}
 @keyframes bl{50%{opacity:0}}
-.hx{font:800 clamp(40px,12.5vw,64px)/.92 var(--m);letter-spacing:-.07em;color:var(--hi);margin:8px 0 0}
-.hx span{display:block;color:var(--mute);font-weight:300;letter-spacing:-.05em}
-.st{display:flex;flex-wrap:wrap;gap:2px 14px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);margin-top:8px}
+.hd{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+
+.bar-top{display:flex;justify-content:space-between;align-items:center;padding:4px 2px 8px}
+.wm{font:600 15px/1 var(--disp);letter-spacing:.32em;color:var(--bone)}
+.up{display:flex;align-items:center;gap:8px;font:500 10px var(--body);letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+.up b{color:var(--bone);font-weight:500}
+.up button{border:1px solid var(--edge-t);padding:4px 8px;font-size:9px;letter-spacing:.2em;text-transform:uppercase}
+.up button.arm{border-color:var(--red);color:var(--red)}
+
+.hero h1{margin:2px 0 0;font:600 clamp(42px,13vw,64px)/.9 var(--disp);letter-spacing:-.02em;color:var(--bone)}
+.hero h1 span{display:block;font-family:var(--mono);font-weight:300;font-size:.62em;letter-spacing:-.04em;color:var(--dim);margin-top:6px}
+.meta{display:flex;flex-wrap:wrap;gap:4px 14px}
+.prog{height:2px;background:rgb(var(--bone-rgb) / .08);position:relative}
+.prog i{position:absolute;inset:0 auto 0 0;background:var(--bone);transition:width .35s}
 
 .week{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
-.wd{border:1px solid var(--line);padding:6px 0 8px;display:flex;flex-direction:column;align-items:center;gap:4px}
-.wd small{font-size:8px;letter-spacing:.16em;color:var(--mute)}
-.wd span{font-size:15px;font-weight:700;color:var(--hi)}
-.wd.rest span{color:var(--c2);font-weight:400}
-.wd.today{border-color:var(--hi)}
+.wd{border:1px solid rgb(var(--bone-rgb) / .08);padding:8px 0 9px;display:flex;flex-direction:column;align-items:center;gap:5px}
+.wd small{font:500 8px var(--body);letter-spacing:.18em;color:var(--muted)}
+.wd span{font:600 16px/1 var(--disp);color:var(--bone)}
+.wd.off span{color:var(--dim);font-weight:500}
+.wd.now{border-color:var(--bone)}
+.wd.done{background:var(--bone)}
+.wd.done small,.wd.done span{color:var(--ink)}
+.today{font:500 13px/1.4 var(--body);color:var(--bone)}
+.today small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
 
-.pick{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line)}
-.pick button{padding:10px 0;font-size:10px;letter-spacing:.18em;color:var(--mute)}
-.pick button+button{border-left:1px solid var(--line)}
-.pick button.on{background:var(--hi);color:#000;font-weight:700}
-.pick button:disabled:not(.on){opacity:.3}
-
-.prog{height:2px;background:var(--line);position:relative}
-.prog i{position:absolute;inset:0 auto 0 0;background:var(--hi);transition:width .3s}
-
-.ex{display:flex;flex-direction:column;gap:10px;padding-top:16px;border-top:1px dashed var(--line)}
-.ex .nm{font-size:12px;font-weight:700;color:var(--hi);text-transform:uppercase;letter-spacing:.04em}
-.ex .nm::before{content:"> ";color:var(--mute)}
+.ex h2{margin:0;font:500 17px/1.2 var(--disp);color:var(--bone)}
 .rx{display:flex;align-items:baseline;gap:12px}
-.rx .w{font:700 36px/1 var(--m);letter-spacing:-.05em;color:var(--hi)}
-.rx .w small{font-size:9px;letter-spacing:.18em;color:var(--mute);margin-left:4px;font-weight:400}
-.rx .r{font-size:20px;color:var(--fg)}
+.rx .w{font:600 40px/1 var(--disp);letter-spacing:-.02em;color:var(--bone);font-variant-numeric:tabular-nums}
+.rx .w small{font:500 10px var(--body);letter-spacing:.2em;color:var(--muted);margin-left:5px}
+.rx .r{font:500 22px/1 var(--disp);color:var(--muted)}
 .rx .cal{margin-left:auto;display:flex;gap:4px}
-.rx .cal button{width:30px;height:28px;border:1px solid var(--line);color:var(--mute)}
-.why{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--mute)}
+.rx .cal button{width:32px;height:30px;border:1px solid rgb(var(--bone-rgb) / .12);color:var(--muted)}
+.why{font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--muted)}
 .why.dn{color:var(--red)}
 .sets{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
-.sb{height:60px;border:1px solid var(--c2);font:700 20px/1 var(--m)}
-.sb.ok{background:var(--hi);color:#000;border-color:var(--hi)}
+.sb{height:58px;border:1px solid rgb(var(--bone-rgb) / .18);font:600 20px/1 var(--disp);color:var(--bone)}
+.sb.ok{background:var(--bone);color:var(--ink);border-color:var(--bone)}
 .sb.no{border-color:var(--red);color:var(--red)}
+.ghost{align-self:flex-start;border:1px solid rgb(var(--bone-rgb) / .2);padding:10px 14px;font:500 11px var(--body);letter-spacing:.2em;text-transform:uppercase}
+.okp{border-top-color:rgb(var(--bone-rgb) / .35)}
+.okp .t{font:600 22px/1.1 var(--disp)}
 
-.ok{border:1px solid var(--hi);padding:14px;display:flex;flex-direction:column;gap:4px;font-size:11px}
-.ok .h{font-weight:700;color:var(--hi);letter-spacing:.06em}
-.ok .h::before{content:"[ OK ] ";color:var(--mute)}
-
-.kpi{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-.kpi .v{font:700 26px/1 var(--m);letter-spacing:-.04em;color:var(--hi)}
-.kpi .v small{font-size:10px;color:var(--mute);font-weight:400;margin-left:2px}
-.panel{display:flex;flex-direction:column;gap:10px;padding-top:14px;border-top:1px dashed var(--line)}
-.panel .hd{display:flex;justify-content:space-between;align-items:baseline}
-.read{font-size:10px;color:var(--fg);min-height:15px}
+.boot{font-family:var(--mono);font-size:11px;line-height:1.75;color:var(--muted);white-space:pre-wrap;min-height:134px}
+.boot b{color:var(--bone);font-weight:500}
+.kpi{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 12px}
+.kpi .v{font:600 30px/1 var(--disp);letter-spacing:-.02em;color:var(--bone);font-variant-numeric:tabular-nums}
+.kpi .v small{font:500 11px var(--body);color:var(--muted);margin-left:3px;letter-spacing:.1em}
 svg{display:block;width:100%;overflow:visible}
-.exr{display:grid;grid-template-columns:minmax(0,1fr) 76px auto;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line)}
-.exr .n{font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-transform:uppercase}
-.exr .v{font-size:11px;text-align:right;white-space:nowrap}
-.exr .v small{color:var(--mute)}
-.blk{display:grid;grid-template-columns:auto 1fr auto;gap:2px 12px;padding:8px 0;border-bottom:1px solid var(--line);font-size:10px}
-.blk .a{color:var(--hi);font-weight:700}
-.blk .m{color:var(--mute)}
+.read{font-family:var(--mono);font-size:10px;color:var(--muted);min-height:15px}
+.read b{color:var(--bone);font-weight:500}
+.exr{display:grid;grid-template-columns:minmax(0,1fr) 70px 64px;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid rgb(var(--bone-rgb) / .06)}
+.exr .n{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.exr .v{font-family:var(--mono);font-size:11px;text-align:right;white-space:nowrap}
+.exr .v small{color:var(--muted)}
+.blk{display:grid;grid-template-columns:auto 1fr auto;gap:2px 12px;padding:8px 0;border-bottom:1px solid rgb(var(--bone-rgb) / .06);font-family:var(--mono);font-size:10px;color:var(--muted)}
+.blk .a{color:var(--bone)}
 .blk .x{text-align:right}
+.term .out{font-family:var(--mono);font-size:11px;line-height:1.7;color:var(--muted);white-space:pre-wrap;max-height:220px;overflow:auto}
+.term .out b{color:var(--bone);font-weight:500}
+.term form{display:flex;align-items:center;gap:8px;border-top:1px solid rgb(var(--bone-rgb) / .08);padding-top:10px;font-family:var(--mono);font-size:12px;color:var(--muted)}
+.term input{flex:1;min-width:0;font:16px var(--mono);color:var(--bone);outline:none;-webkit-user-select:text;user-select:text}
+.empty{font-family:var(--mono);font-size:11px;color:var(--dim);padding:18px 0;text-align:center;border:1px dashed rgb(var(--bone-rgb) / .1);line-height:1.7}
 
-nav{position:fixed;left:0;right:0;bottom:0;z-index:20;background:#000;border-top:1px solid var(--line);padding:0 max(18px,env(safe-area-inset-right)) env(safe-area-inset-bottom) max(18px,env(safe-area-inset-left))}
-nav .in{max-width:520px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr}
-nav button{height:54px;font-size:10px;letter-spacing:.24em;color:var(--mute)}
-nav button.on{color:var(--hi)}
-nav button.on::before{content:"▸ "}
+.anim .grow{transform-box:fill-box;transform-origin:50% 100%;animation:grow .7s cubic-bezier(.2,.8,.2,1) both}
+.anim .draw{stroke-dasharray:600;stroke-dashoffset:600;animation:draw 1.2s ease-out .15s forwards}
+.anim.fade,.anim .fade{animation:fade .5s ease-out both}
+@keyframes grow{from{transform:scaleY(0)}}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}}
 
-.timer{position:fixed;left:0;right:0;bottom:calc(55px + env(safe-area-inset-bottom));z-index:21;background:var(--hi);color:#000;padding:10px max(18px,env(safe-area-inset-right)) 10px max(18px,env(safe-area-inset-left))}
+.timer{background:var(--bone);color:var(--ink);padding:10px max(16px,env(safe-area-inset-right)) 10px max(16px,env(safe-area-inset-left))}
 .timer[hidden]{display:none}
-.timer .in{max-width:520px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:10px}
-.timer .t{font:700 30px/1 var(--m);letter-spacing:-.04em}
-.timer .l{font-size:9px;letter-spacing:.22em;text-transform:uppercase}
+.timer .in{max-width:540px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.timer .t{font:600 30px/1 var(--disp);font-variant-numeric:tabular-nums}
+.timer .l{font:500 9px var(--body);letter-spacing:.22em;text-transform:uppercase}
 .timer .b{display:flex;gap:6px}
-.timer .b button{border:1px solid #000;padding:7px 10px;font-size:11px}
+.timer .b button{border:1px solid var(--ink);padding:8px 10px;font-size:12px}
 .timer.go{background:var(--red);color:#fff}
 .timer.go .b button{border-color:#fff}
-@media (prefers-reduced-motion:reduce){.caret{animation:none}}
+nav{background:var(--ink);border-top:1px solid var(--edge-t);padding:0 max(14px,env(safe-area-inset-right)) env(safe-area-inset-bottom) max(14px,env(safe-area-inset-left))}
+nav .in{max-width:540px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr}
+nav button{height:54px;font:500 10px var(--body);letter-spacing:.26em;text-transform:uppercase;color:var(--dim)}
+nav button.on{color:var(--bone)}
+@media (prefers-reduced-motion:reduce){.caret,.anim .grow,.anim .draw,.anim .fade,.anim.fade{animation:none;stroke-dashoffset:0}}
 </style>
 </head>
 <body>
-<div class="app" id="app"></div>
-<div class="timer" id="timer" hidden><div class="in">
-  <div><div class="l" id="tl">cooldown</div><div class="t" id="tt">2:30</div></div>
-  <div class="b"><button data-a="tm">−15</button><button data-a="tp">+15</button><button data-a="ts">×</button></div>
-</div></div>
-<nav><div class="in"><button data-a="tab" data-t="mine">MINE</button><button data-a="tab" data-t="ledger">LEDGER</button></div></nav>
+<div id="scroll"><div class="app" id="app"></div></div>
+<footer>
+  <div class="timer" id="timer" hidden><div class="in">
+    <div><div class="l" id="tl">cooldown</div><div class="t" id="tt">2:30</div></div>
+    <div class="b"><button data-a="tm">−15</button><button data-a="tp">+15</button><button data-a="ts">×</button></div>
+  </div></div>
+  <nav><div class="in"><button data-a="tab" data-t="grind">Grind</button><button data-a="tab" data-t="ledger">Ledger</button></div></nav>
+</footer>
 <script>
 (function(){
 'use strict';
 var KEY='raid.v2';
-var NAME={A:'PUSH',B:'PULL',C:'LEGS'};
+/* Фулл-бади 3 раза в неделю: каждая сессия — ноги + жим + тяга + плечи + руки. */
+var SCHED={1:'A',3:'B',5:'C'};
+var NAME={A:'Full Body A',B:'Full Body B',C:'Full Body C'};
+var FOCUS={A:'присед · жим лёжа · тяга штанги',B:'румынская тяга · наклонный жим · верхний блок',C:'жим ногами · жим гантелей · горизонтальная тяга'};
 var PLAN={
   A:[
+    {id:'squat',n:'Присед со штангой',s:3,r:8,rest:150,w0:40,st:2.5},
     {id:'bench',n:'Жим штанги лёжа',s:3,r:8,rest:150,w0:30,st:2.5},
-    {id:'incline',n:'Жим гантелей на наклонной',s:3,r:10,rest:150,w0:10,st:1,db:1},
-    {id:'dbpress',n:'Жим гантелей сидя',s:3,r:10,rest:120,w0:8,st:1,db:1},
-    {id:'pushdown',n:'Разгибания на трицепс, блок',s:3,r:12,rest:105,w0:15,st:2.5},
-    {id:'french',n:'Французский жим',s:2,r:12,rest:105,w0:15,st:2.5}
+    {id:'row',n:'Тяга штанги в наклоне',s:3,r:10,rest:150,w0:30,st:2.5},
+    {id:'dbpress',n:'Жим гантелей сидя',s:2,r:10,rest:120,w0:8,st:1,db:1},
+    {id:'curl',n:'Сгибания с гантелями',s:2,r:12,rest:90,w0:8,st:1,db:1},
+    {id:'pushdown',n:'Разгибания на блоке',s:2,r:12,rest:90,w0:15,st:2.5}
   ],
   B:[
-    {id:'pulldown',n:'Верхний блок к груди',s:3,r:10,rest:150,w0:35,st:2.5},
-    {id:'row',n:'Тяга штанги в наклоне',s:3,r:10,rest:150,w0:30,st:2.5},
-    {id:'cablerow',n:'Тяга горизонтального блока',s:3,r:12,rest:120,w0:30,st:2.5},
-    {id:'curl',n:'Сгибания на бицепс',s:3,r:12,rest:105,w0:8,st:1,db:1},
-    {id:'hammer',n:'Молотки',s:2,r:12,rest:105,w0:8,st:1,db:1}
+    {id:'rdl',n:'Румынская тяга',s:3,r:10,rest:150,w0:40,st:2.5},
+    {id:'incline',n:'Жим гантелей на наклонной',s:3,r:10,rest:150,w0:10,st:1,db:1},
+    {id:'pulldown',n:'Верхний блок к груди',s:3,r:10,rest:120,w0:35,st:2.5},
+    {id:'lunge',n:'Выпады с гантелями',s:2,r:10,rest:120,w0:8,st:1,db:1},
+    {id:'hammer',n:'Молотки',s:2,r:12,rest:90,w0:8,st:1,db:1},
+    {id:'french',n:'Французский жим',s:2,r:12,rest:90,w0:15,st:2.5}
   ],
   C:[
-    {id:'squat',n:'Присед или жим ногами',s:3,r:10,rest:150,w0:40,st:2.5},
-    {id:'rdl',n:'Румынская тяга',s:3,r:10,rest:150,w0:40,st:2.5},
-    {id:'legcurl',n:'Сгибания ног в тренажёре',s:3,r:12,rest:105,w0:20,st:2.5},
-    {id:'calf',n:'Подъёмы на носки',s:3,r:15,rest:90,w0:30,st:2.5}
+    {id:'legpress',n:'Жим ногами',s:3,r:12,rest:150,w0:60,st:5},
+    {id:'dbbench',n:'Жим гантелей лёжа',s:3,r:10,rest:150,w0:12,st:1,db:1},
+    {id:'cablerow',n:'Тяга горизонтального блока',s:3,r:12,rest:120,w0:30,st:2.5},
+    {id:'lateral',n:'Махи гантелями в стороны',s:3,r:15,rest:75,w0:5,st:1,db:1},
+    {id:'ezcurl',n:'Сгибания со штангой',s:2,r:12,rest:90,w0:15,st:2.5},
+    {id:'calf',n:'Подъёмы на носки',s:3,r:15,rest:75,w0:30,st:2.5}
   ]
 };
 var EX={};Object.keys(PLAN).forEach(function(t){PLAN[t].forEach(function(x){EX[x.id]=x})});
 var WD=['ВС','ПН','ВТ','СР','ЧТ','ПТ','СБ'],ORDER=[1,2,3,4,5,6,0];
 
 function pad(n){return String(n).padStart(2,'0')}
-function today(){var d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
+function key(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
+function today(){return key(new Date())}
 function days(a,b){var p=function(k){var x=k.split('-');return new Date(+x[0],x[1]-1,+x[2])};return Math.round((p(b)-p(a))/864e5)}
 function num(x){return String(x).replace('.',',')}
-function hex(n,l){return '0x'+n.toString(16).toUpperCase().padStart(l||4,'0')}
+function hex(n){return '0x'+n.toString(16).toUpperCase().padStart(4,'0')}
 function fnv(s){var h=0x811c9dc5;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0}return ('0000000'+h.toString(16)).slice(-8)}
 function sp(n){return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g,' ')}
 function dm(k){return k.slice(8)+'.'+k.slice(5,7)}
+function esc(s){return String(s).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]})}
+var SC=document.getElementById('scroll');
+function top0(smooth){SC.scrollTo({top:0,behavior:smooth?'smooth':'auto'})}
 
 var S;try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 if(!S||!S.log)S={log:[],abst:{start:today(),best:0}};
-if(!S.sched)S.sched={1:'A',3:'B',5:'C'};
-var UI={tab:'mine',pick:null,armed:0,sel:-1};
-try{UI.tab=localStorage.getItem(KEY+'.tab')||'mine'}catch(e){}
+var UI={tab:'grind',armed:0,sel:-1,off:false,phase:'done',term:[]};
+try{var tb=localStorage.getItem(KEY+'.tab');UI.tab=tb==='ledger'?'ledger':'grind'}catch(e){}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 
 /* незакрытая тренировка прошлого дня закрывается: неотмеченное = провал */
 (function(){var L=S.log[S.log.length-1];if(L&&!L.done&&L.d<today()){(PLAN[L.t]||[]).forEach(function(x){var e=L.ex[x.id];if(!e)return;for(var i=0;i<x.s;i++)if(e.s[i]!==1)e.s[i]=0});L.done=true;save()}})();
+/* незакрытая сегодняшняя тренировка из старой программы перекладывается на текущую */
+(function(){var L=S.log[S.log.length-1];if(L&&!L.done&&!Object.keys(L.ex).some(function(id){return PLAN[L.t]&&PLAN[L.t].some(function(x){return x.id===id})})){S.log.pop();save()}})();
 
-function current(){var L=S.log[S.log.length-1];return L&&!L.done?L:null}
-function dayType(){var w=new Date().getDay();if(S.sched[w])return S.sched[w];for(var i=1;i<7;i++){var t=S.sched[(w+i)%7];if(t)return t}return 'A'}
+function current(){var L=S.log[S.log.length-1];return L&&!L.done&&PLAN[L.t]?L:null}
+function doneToday(){return S.log.some(function(L){return L.done&&L.d===today()})}
+function nextSlot(from){var w=new Date().getDay();for(var i=from;i<from+7;i++){var d=(w+i)%7;if(SCHED[d])return {t:SCHED[d],d:d,in:i}}return {t:'A',d:1,in:0}}
 function hist(id,upto){var out=[];for(var i=upto-1;i>=0;i--){var e=S.log[i].ex[id];if(e&&e.s.some(function(v){return v===1||v===0}))out.push(e)}return out}
 function passed(x,e){for(var i=0;i<x.s;i++)if(e.s[i]!==1)return false;return true}
 function rnd(v,st){return Math.max(st,Math.round(v/st)*st)}
@@ -177,86 +216,172 @@ function rx(x,idx){
   if(cur&&typeof cur.cal==='number')return {w:cur.cal,why:'manual override'};
   var h=hist(x.id,idx);
   if(!h.length)return {w:x.w0,why:'genesis weight'};
-  if(passed(x,h[0]))return {w:+(h[0].w+x.st).toFixed(1),why:'prev tx valid · +'+num(x.st)+' кг'};
+  if(passed(x,h[0]))return {w:+(h[0].w+x.st).toFixed(1),why:'prev tx valid · +'+num(x.st)+' kg'};
   if(h[1]&&!passed(x,h[1])&&h[1].w===h[0].w)return {w:rnd(h[0].w*.9,x.st),why:'2× tx failed · rollback −10%',dn:1};
   return {w:h[0].w,why:'prev tx failed · retry same weight'};
 }
 function tonnage(L){var t=0;Object.keys(L.ex).forEach(function(id){var x=EX[id],e=L.ex[id];if(!x)return;e.s.forEach(function(v){if(v===1)t+=e.w*(x.db?2:1)*x.r})});return t}
 function sets(L){var ok=0,all=0;Object.keys(L.ex).forEach(function(id){L.ex[id].s.forEach(function(v){if(v===1||v===0)all++;if(v===1)ok++})});return {ok:ok,all:all}}
 function chain(){var prev='0000000000000000',out=[];S.log.forEach(function(L,i){if(!L.done)return;var h=fnv(prev+L.d+L.t+JSON.stringify(L.ex))+fnv(L.d+prev+i);out.push({i:i,L:L,h:h,p:prev,ton:tonnage(L),s:sets(L)});prev=h});return out}
+function weekDates(){var d=new Date(),w=(d.getDay()+6)%7;d.setDate(d.getDate()-w);var out={};for(var i=0;i<7;i++){out[(i+1)%7]=key(d);d.setDate(d.getDate()+1)}return out}
+function uptime(){return Math.max(0,days(S.abst.start,today()))}
+function tname(t){return NAME[t]||('Legacy '+t)}
+
+/* какая сессия на экране: по расписанию, без ручного выбора */
+function session(){
+  var cur=current();if(cur)return {t:cur.t,mode:'live'};
+  var w=new Date().getDay();
+  if(doneToday()){var n=nextSlot(1);return {t:n.t,mode:'next',n:n}}
+  if(SCHED[w])return {t:SCHED[w],mode:'ready'};
+  var n2=nextSlot(1);return {t:n2.t,mode:UI.off?'ready':'rest',n:n2};
+}
 
 function render(){
   document.querySelectorAll('nav button').forEach(function(b){b.classList.toggle('on',b.dataset.t===UI.tab)});
-  var ad=Math.max(0,days(S.abst.start,today()));
-  var h='<div class="top"><span>raid//node</span><span class="r">uptime <b>'+ad+'d</b>'+(S.abst.best>ad?' · max '+S.abst.best+'d':'')+
+  var ad=uptime();
+  var h='<div class="bar-top"><span class="wm">BACELAUR</span><span class="up">uptime <b>'+ad+'d</b>'+(S.abst.best>ad?' · max '+S.abst.best:'')+
     '<button data-a="ab" class="'+(UI.armed?'arm':'')+'">'+(UI.armed?'confirm':'reset')+'</button></span></div>';
-  h+=UI.tab==='ledger'?ledger():mine();
+  h+=UI.tab==='ledger'?ledger():grind();
   document.getElementById('app').innerHTML=h;
+  var o=document.getElementById('tout');if(o)o.scrollTop=o.scrollHeight;
 }
 
-function mine(){
-  var cur=current(),idx=cur?S.log.length-1:S.log.length,t=cur?cur.t:(UI.pick||dayType()),plan=PLAN[t];
+function grind(){
+  var se=session(),cur=current(),idx=cur?S.log.length-1:S.log.length,plan=PLAN[se.t];
   var ch=chain(),last=ch[ch.length-1],prev=last?last.h:'0000000000000000';
   var marked=0,total=0;plan.forEach(function(x){total+=x.s;var e=cur&&cur.ex[x.id];if(e)e.s.forEach(function(v){if(v===1||v===0)marked++})});
   var h='';
-  if(last&&last.L.d===today()&&!cur){
-    h+='<div class="ok"><div class="h">BACELAUR '+hex(ch.length)+' CONFIRMED</div><div>hash <b>0x'+last.h+'</b></div><div class="lbl">'+NAME[last.L.t]+' · '+sp(last.ton)+' кг · '+last.s.ok+'/'+last.s.all+' tx valid</div></div>';
+  if(se.mode==='next'&&last){
+    h+='<section class="plate okp"><div class="eb">[ ok ] block confirmed · '+dm(last.L.d)+'</div><div class="t">BACELAUR '+hex(ch.length)+'</div>'+
+       '<div class="mono">hash <b>0x'+last.h+'</b><br>'+tname(last.L.t)+' · <b>'+sp(last.ton)+' kg</b> · '+last.s.ok+'/'+last.s.all+' tx valid</div></section>';
   }
-  h+='<header><div class="sh">root@raid:~$ <i>./mine --height '+(ch.length+1)+' --sig '+NAME[t].toLowerCase()+'</i><span class="caret"></span></div>'+
-     '<div class="hx">BACELAUR<span>'+hex(ch.length+1)+'</span></div>'+
-     '<div class="st"><span>status <b>'+(cur?'mining':'awaiting tx')+'</b></span><span>prev <b>0x'+prev.slice(0,6)+'…'+prev.slice(-4)+'</b></span><span>tx <b>'+marked+'/'+total+'</b></span></div></header>';
-  var w=new Date().getDay();
-  h+='<div><div class="lbl" style="margin-bottom:6px">schedule</div><div class="week">'+ORDER.map(function(d){var s=S.sched[d];return '<button class="wd'+(s?'':' rest')+(d===w?' today':'')+'" data-a="sd" data-d="'+d+'"><small>'+WD[d]+'</small><span>'+(s||'·')+'</span></button>'}).join('')+'</div></div>';
-  h+='<div class="pick">'+['A','B','C'].map(function(k){return '<button data-a="pk" data-t="'+k+'" class="'+(k===t?'on':'')+'"'+(cur?' disabled':'')+'>'+k+' '+NAME[k]+'</button>'}).join('')+'</div>';
-  h+='<div class="prog"><i style="width:'+(marked/total*100)+'%"></i></div>';
-  plan.forEach(function(x){
+  var wd=weekDates(),w=new Date().getDay();
+  h+='<section class="plate"><div class="eb">schedule · week</div><div class="week">'+ORDER.map(function(d){
+      var t=SCHED[d],dn=S.log.some(function(L){return L.done&&L.d===wd[d]});
+      return '<div class="wd'+(t?'':' off')+(d===w?' now':'')+(dn?' done':'')+'"><small>'+WD[d]+'</small><span>'+(dn?'✓':(t||'·'))+'</span></div>'}).join('')+'</div>';
+  var lbl=se.mode==='live'?'grinding now':se.mode==='ready'?'today':se.mode==='rest'?'rest day · next '+WD[se.n.d]:'next · '+WD[se.n.d];
+  h+='<div class="today"><span class="eb">'+lbl+'</span><br>'+NAME[se.t]+'<small>'+FOCUS[se.t]+'</small></div></section>';
+
+  h+='<section class="plate hero"><div class="mono">root@bacelaur:~$ <b>./grind --height '+(ch.length+1)+' --sig '+se.t.toLowerCase()+'</b><span class="caret"></span></div>'+
+     '<h1>BACELAUR<span>'+hex(ch.length+1)+'</span></h1>'+
+     '<div class="meta eb"><span>status <b>'+(se.mode==='live'?'grinding':se.mode==='ready'?'awaiting tx':'locked')+'</b></span><span>prev <b>0x'+prev.slice(0,6)+'…'+prev.slice(-4)+'</b></span><span>tx <b>'+marked+'/'+total+'</b></span></div>'+
+     '<div class="prog"><i style="width:'+(marked/total*100)+'%"></i></div>'+
+     (se.mode==='rest'?'<button class="ghost" data-a="off">grind anyway →</button>':'')+'</section>';
+
+  var active=se.mode==='live'||se.mode==='ready';
+  plan.forEach(function(x,k){
     var p=rx(x,idx),e=cur&&cur.ex[x.id],started=e&&e.s.some(function(v){return v===1||v===0});
-    h+='<section class="ex"><div class="nm">'+x.n+'</div><div class="rx"><span class="w">'+num(p.w)+'<small>KG'+(x.db?' ×2':'')+'</small></span><span class="r">'+x.s+'×'+x.r+'</span>'+
-      (started?'':'<span class="cal"><button data-a="c" data-x="'+x.id+'" data-d="-1" aria-label="легче">−</button><button data-a="c" data-x="'+x.id+'" data-d="1" aria-label="тяжелее">+</button></span>')+
-      '</div><div class="why'+(p.dn?' dn':'')+'">'+p.why+'</div><div class="sets">';
-    for(var i=0;i<x.s;i++){var v=e?e.s[i]:null;h+='<button class="sb'+(v===1?' ok':v===0?' no':'')+'" data-a="s" data-x="'+x.id+'" data-i="'+i+'">'+(v===1?'✓':v===0?'✗':(i+1))+'</button>'}
-    h+='</div></section>';
+    h+='<section class="plate ex"><div class="hd"><span class="eb">'+pad(k+1)+' / '+pad(plan.length)+'</span><span class="eb">cooldown '+Math.floor(x.rest/60)+':'+pad(x.rest%60)+'</span></div>'+
+      '<h2>'+x.n+'</h2><div class="rx"><span class="w">'+num(p.w)+'<small>KG'+(x.db?' ×2':'')+'</small></span><span class="r">'+x.s+'×'+x.r+'</span>'+
+      (active&&!started?'<span class="cal"><button data-a="c" data-x="'+x.id+'" data-d="-1" aria-label="легче">−</button><button data-a="c" data-x="'+x.id+'" data-d="1" aria-label="тяжелее">+</button></span>':'')+
+      '</div><div class="why'+(p.dn?' dn':'')+'">> '+p.why+'</div>';
+    if(active){h+='<div class="sets">';for(var i=0;i<x.s;i++){var v=e?e.s[i]:null;h+='<button class="sb'+(v===1?' ok':v===0?' no':'')+'" data-a="s" data-x="'+x.id+'" data-i="'+i+'">'+(v===1?'✓':v===0?'✗':(i+1))+'</button>'}h+='</div>'}
+    h+='</section>';
   });
-  h+='<div class="lbl" style="line-height:1.8">✓ valid tx — все повторы чисто · 2-й тап ✗ failed · все ✓ → next block heavier</div>';
+  if(active)h+='<div class="mono" style="padding:6px 4px;line-height:1.8">✓ valid tx — все повторы чисто · 2-й тап ✗ failed<br>все ✓ → следующий блок тяжелее</div>';
   return h;
 }
 
+/* ---------- ledger ---------- */
 function ledger(){
-  var ch=chain(),n=ch.length;
-  var h='<header><div class="sh">root@raid:~$ <i>./ledger --verify</i><span class="caret"></span></div><div class="st"><span>'+(n?'> '+n+' bacelaur blocks · chain valid':'> ledger empty · mine genesis block')+'</span></div></header>';
-  if(!n)return h;
+  var ch=chain(),n=ch.length,cur=current();
+  var h='<section class="plate"><div class="mono">root@bacelaur:~$ <b>./ledger --decrypt</b>'+(UI.phase==='boot'?'':'<span class="caret"></span>')+'</div><div class="boot" id="boot">'+(UI.phase==='boot'?'':bootText(ch).join('\n'))+'</div></section>';
+  if(UI.phase==='boot')return h;
+  var an=UI.phase==='anim'?' anim':'';
   var tot=0,ok=0,all=0;ch.forEach(function(b){tot+=b.ton;ok+=b.s.ok;all+=b.s.all});
-  h+='<div class="kpi"><div><div class="v">'+n+'</div><div class="lbl">mined</div></div><div><div class="v">'+(tot>=10000?num((tot/1000).toFixed(1))+'<small>t</small>':sp(tot)+'<small>kg</small>')+'</div><div class="lbl">tonnage</div></div><div><div class="v">'+(all?Math.round(ok/all*100):0)+'<small>%</small></div><div class="lbl">tx valid</div></div></div>';
+  var wd=weekDates(),wk=ch.filter(function(b){return b.L.d>=wd[1]}).length;
+  h+='<section class="plate'+an+(an?' fade':'')+'"><div class="eb">network stats</div><div class="kpi">'+
+     '<div><div class="v">'+n+'</div><div class="eb">blocks</div></div>'+
+     '<div><div class="v">'+(tot>=10000?num((tot/1000).toFixed(1))+'<small>t</small>':sp(tot)+'<small>kg</small>')+'</div><div class="eb">tonnage</div></div>'+
+     '<div><div class="v">'+(all?Math.round(ok/all*100):0)+'<small>%</small></div><div class="eb">tx valid</div></div>'+
+     '<div><div class="v">'+wk+'<small>/ 3</small></div><div class="eb">this week</div></div></div></section>';
 
-  /* тоннаж по блокам */
-  var bars=ch.slice(-24),W=320,H=110,max=Math.max.apply(null,bars.map(function(b){return b.ton}))||1,bw=W/24,g='';
-  for(var y=0;y<=2;y++){var yy=H-H*y/2;g+='<line x1="0" x2="'+W+'" y1="'+yy+'" y2="'+yy+'" stroke="#1f1f1d" stroke-width="1"/>'}
-  bars.forEach(function(b,i){var bh=Math.max(2,b.ton/max*(H-6)),x=i*bw+2,sel=UI.sel===b.i;
-    g+='<rect x="'+x+'" y="'+(H-bh)+'" width="'+(bw-4)+'" height="'+bh+'" rx="1.5" fill="'+(sel?'#fff':(b.s.ok<b.s.all?'#45453f':'#bdbcb6'))+'"/>'+
-       '<rect data-a="bar" data-i="'+b.i+'" x="'+(i*bw)+'" y="0" width="'+bw+'" height="'+H+'" fill="transparent" style="cursor:pointer"/>'});
-  var sb=ch.filter(function(b){return b.i===UI.sel})[0]||ch[n-1];
-  h+='<section class="panel"><div class="hd"><span class="lbl">tonnage / bacelaur</span><span class="lbl">max '+sp(max)+' kg</span></div>'+
-     '<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" style="height:'+H+'px" role="img" aria-label="Тоннаж по тренировкам">'+g+'</svg>'+
-     '<div class="read">> '+hex(ch.indexOf(sb)+1)+' · '+dm(sb.L.d)+' · '+NAME[sb.L.t]+' · <b>'+sp(sb.ton)+' kg</b> · '+sb.s.ok+'/'+sb.s.all+' valid</div></section>';
+  /* тоннаж по блокам, включая текущий незакрытый */
+  var bars=ch.slice(-16).map(function(b){return {i:b.i,ton:b.ton,ok:b.s.ok===b.s.all,L:b.L,pend:false}});
+  if(cur)bars.push({i:S.log.length-1,ton:tonnage(cur),ok:true,L:cur,pend:true});
+  var W=320,H=120,max=Math.max.apply(null,bars.map(function(b){return b.ton}).concat([1])),slots=Math.max(8,bars.length),bw=W/slots,g='';
+  for(var y=1;y<=3;y++){var yy=H-H*y/3;g+='<line x1="0" x2="'+W+'" y1="'+yy+'" y2="'+yy+'" stroke="rgb(235 233 228 / .06)"/>'}
+  g+='<line x1="0" x2="'+W+'" y1="'+H+'" y2="'+H+'" stroke="rgb(235 233 228 / .2)"/>';
+  bars.forEach(function(b,i){var bh=Math.max(3,b.ton/max*(H-8)),x=i*bw+3,sel=UI.sel===b.i;
+    g+=b.pend?'<rect class="grow" x="'+x+'" y="'+(H-bh)+'" width="'+(bw-6)+'" height="'+bh+'" fill="none" stroke="#ebe9e4" stroke-dasharray="3 3"/>'
+             :'<rect class="grow" style="animation-delay:'+(i*45)+'ms" x="'+x+'" y="'+(H-bh)+'" width="'+(bw-6)+'" height="'+bh+'" rx="2" fill="'+(sel?'#ffffff':b.ok?'#ebe9e4':'#5d5c58')+'"/>';
+    g+='<rect data-a="bar" data-i="'+b.i+'" x="'+(i*bw)+'" y="0" width="'+bw+'" height="'+H+'" fill="transparent" style="cursor:pointer"/>'});
+  var sb=bars.filter(function(b){return b.i===UI.sel})[0]||bars[bars.length-1];
+  h+='<section class="plate'+an+'"><div class="hd"><span class="eb">tonnage / block</span><span class="eb">max <b>'+sp(max)+'</b> kg</span></div>';
+  if(bars.length){
+    h+='<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" style="height:'+H+'px" role="img" aria-label="Тоннаж по тренировкам">'+g+'</svg>'+
+       '<div class="read">> '+(sb.pend?'pending':hex(ch.findIndex(function(b){return b.i===sb.i})+1))+' · '+dm(sb.L.d)+' · '+tname(sb.L.t)+' · <b>'+sp(sb.ton)+' kg</b></div>';
+  }else{var nx=nextSlot(doneToday()?1:0);h+='<div class="empty">awaiting genesis block<br>первый столбик появится с первым подходом<br>next: '+NAME[nx.t]+' · '+WD[nx.d]+'</div>'}
+  h+='</section>';
 
-  /* прогресс по упражнениям */
+  /* индекс силы: сумма рабочих весов базовых упражнений после каждого блока */
+  var core=['squat','bench','row','rdl','pulldown','legpress'],idxPts=[],lastW={};
+  ch.forEach(function(b){core.forEach(function(id){var e=b.L.ex[id];if(e&&e.s.some(function(v){return v===1}))lastW[id]=e.w});var s=0;core.forEach(function(id){s+=lastW[id]||EX[id].w0});idxPts.push(s)});
+  h+='<section class="plate'+an+'"><div class="hd"><span class="eb">strength index</span>'+(idxPts.length?'<span class="eb"><b>'+sp(idxPts[idxPts.length-1])+'</b> kg · Δ '+(idxPts[idxPts.length-1]-idxPts[0]>=0?'+':'−')+num(Math.abs(idxPts[idxPts.length-1]-idxPts[0]))+'</span>':'')+'</div>';
+  if(idxPts.length){
+    var lo=Math.min.apply(null,idxPts),hi=Math.max.apply(null,idxPts),pts=idxPts.length>1?idxPts:[idxPts[0],idxPts[0]],d='',ex2=0,ey=0;
+    pts.forEach(function(v,i){ex2=i/(pts.length-1)*W;ey=hi===lo?H/2:H-8-(v-lo)/(hi-lo)*(H-20);d+=(i?'L':'M')+ex2.toFixed(1)+' '+ey.toFixed(1)});
+    h+='<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" style="height:'+H+'px" role="img" aria-label="Индекс силы"><line x1="0" x2="'+W+'" y1="'+H+'" y2="'+H+'" stroke="rgb(235 233 228 / .2)"/><path class="draw" d="'+d+'" fill="none" stroke="#ebe9e4" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg>'+
+       '<div class="read">> сумма рабочих весов: присед · жим · тяги · жим ногами</div>';
+  }else h+='<div class="empty">линия силы начнётся после первого закрытого блока</div>';
+  h+='</section>';
+
+  /* веса по упражнениям */
   var rows='';
   Object.keys(EX).forEach(function(id){
-    var pts=ch.map(function(b){var e=b.L.ex[id];return e&&e.s.some(function(v){return v===1||v===0})?e.w:null}).filter(function(v){return v!==null});
-    if(!pts.length)return;
-    var lo=Math.min.apply(null,pts),hi=Math.max.apply(null,pts),sw=76,sh=20,d='';
-    pts.forEach(function(v,i){var x=pts.length>1?i/(pts.length-1)*sw:sw/2,y=hi===lo?sh/2:sh-(v-lo)/(hi-lo)*(sh-4)-2;d+=(i?'L':'M')+x.toFixed(1)+' '+y.toFixed(1)});
-    var lx=pts.length>1?sw:sw/2,ly=hi===lo?sh/2:sh-(pts[pts.length-1]-lo)/(hi-lo)*(sh-4)-2;var dl=pts[pts.length-1]-pts[0];
-    rows+='<div class="exr"><span class="n">'+EX[id].n+'</span><svg viewBox="0 0 '+sw+' '+sh+'" style="height:'+sh+'px" aria-hidden="true"><path d="'+d+'" fill="none" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/><circle cx="'+lx+'" cy="'+ly+'" r="2.5" fill="#fff"/></svg><span class="v"><b>'+num(pts[pts.length-1])+'</b> <small>'+(dl>0?'+':dl<0?'−':'±')+num(Math.abs(dl))+'</small></span></div>';
+    var p=ch.map(function(b){var e=b.L.ex[id];return e&&e.s.some(function(v){return v===1||v===0})?e.w:null}).filter(function(v){return v!==null});
+    if(!p.length)return;
+    var lo=Math.min.apply(null,p),hi=Math.max.apply(null,p),sw=70,sh=20,d='',lx=0,ly=0,q=p.length>1?p:[p[0],p[0]];
+    q.forEach(function(v,i){lx=i/(q.length-1)*sw;ly=hi===lo?sh/2:sh-(v-lo)/(hi-lo)*(sh-4)-2;d+=(i?'L':'M')+lx.toFixed(1)+' '+ly.toFixed(1)});
+    var dl=p[p.length-1]-p[0];
+    rows+='<div class="exr"><span class="n">'+EX[id].n+'</span><svg viewBox="0 0 '+sw+' '+sh+'" style="height:'+sh+'px" aria-hidden="true"><path class="draw" d="'+d+'" fill="none" stroke="#ebe9e4" stroke-width="1.5"/><circle cx="'+lx+'" cy="'+ly+'" r="2.5" fill="#ebe9e4"/></svg><span class="v">'+num(p[p.length-1])+' <small>'+(dl>0?'+':dl<0?'−':'±')+num(Math.abs(dl))+'</small></span></div>';
   });
-  h+='<section class="panel"><div class="hd"><span class="lbl">weight / exercise</span><span class="lbl">kg · Δ since genesis</span></div><div>'+rows+'</div></section>';
+  if(rows)h+='<section class="plate'+an+'"><div class="eb">weight / exercise · Δ since genesis</div><div>'+rows+'</div></section>';
 
-  /* сам реестр */
-  var bl='';ch.slice().reverse().slice(0,30).forEach(function(b,j){var k=n-j;
-    bl+='<div class="blk"><span class="a">'+hex(k)+'</span><span>'+NAME[b.L.t]+' · '+dm(b.L.d)+'</span><span class="x">'+sp(b.ton)+' kg</span>'+
-        '<span class="m">0x'+b.h.slice(0,8)+'</span><span class="m">prev 0x'+b.p.slice(0,8)+'</span><span class="x m">'+b.s.ok+'/'+b.s.all+'</span></div>'});
-  h+='<section class="panel"><div class="hd"><span class="lbl">chain</span><span class="lbl">latest first</span></div><div>'+bl+'</div></section>';
+  if(n){var bl='';ch.slice().reverse().slice(0,20).forEach(function(b,j){var k=n-j;
+    bl+='<div class="blk"><span class="a">'+hex(k)+'</span><span>'+tname(b.L.t)+' · '+dm(b.L.d)+'</span><span class="x a">'+sp(b.ton)+' kg</span><span>0x'+b.h.slice(0,8)+'</span><span>← 0x'+b.p.slice(0,8)+'</span><span class="x">'+b.s.ok+'/'+b.s.all+'</span></div>'});
+    h+='<section class="plate'+an+'"><div class="eb">chain · latest first</div><div>'+bl+'</div></section>';}
+
+  h+='<section class="plate term"><div class="eb">terminal · type help</div><div class="out" id="tout">'+UI.term.join('\n')+'</div>'+
+     '<form id="tf" autocomplete="off"><span>$</span><input id="ti" type="text" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="send" aria-label="Команда" placeholder="help"></form></section>';
   return h;
+}
+function bootText(ch){
+  var tot=0;ch.forEach(function(b){tot+=b.ton});
+  return ['> ssh root@bacelaur.chain','> handshake ............ <b>ok</b>','> bypass firewall ...... <b>ok</b>','> decrypting ledger [██████████] <b>100%</b>',
+    '> '+ch.length+' blocks verified · '+sp(tot)+' kg moved','> uptime '+uptime()+'d · chain integrity <b>valid</b>','> <b>access granted</b>'];
+}
+var bootT=null;
+function boot(){
+  clearInterval(bootT);
+  var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduce){UI.phase='done';render();return}
+  UI.phase='boot';render();
+  var plain=bootText(chain()).map(function(l){return l.replace(/<\/?b>/g,'')}),li=0,ci=0,buf='';
+  bootT=setInterval(function(){
+    var el=document.getElementById('boot');
+    if(UI.tab!=='ledger'||!el){clearInterval(bootT);return}
+    if(li>=plain.length){clearInterval(bootT);UI.phase='anim';render();setTimeout(function(){if(UI.phase==='anim')UI.phase='done'},1700);return}
+    ci+=3;el.textContent=buf+plain[li].slice(0,ci);
+    if(ci>=plain[li].length){buf+=plain[li]+'\n';li++;ci=0}
+  },16);
+}
+
+/* ---------- командная строка ---------- */
+function cmd(raw){
+  var c=raw.trim().toLowerCase();if(!c)return;
+  var out=['<b>$ '+esc(c)+'</b>'],ch=chain();
+  if(c==='help')out.push('status   текущий блок\nnext     следующая тренировка\nweek     неделя\npr       рекорды по весам\nchain    последние блоки\nuptime   счётчик\nclear    очистить');
+  else if(c==='status'){var se=session();out.push('height '+(ch.length+1)+' · '+NAME[se.t]+' · '+se.mode+'\nuptime '+uptime()+'d')}
+  else if(c==='next'){var n=nextSlot(current()||doneToday()?1:0);out.push(NAME[n.t]+' · '+WD[n.d]+(n.in===0?' · сегодня':' · через '+n.in+' д')+'\n'+PLAN[n.t].map(function(x){return '  '+x.n+' '+num(rx(x,S.log.length).w)+'kg '+x.s+'×'+x.r}).join('\n'))}
+  else if(c==='week'){var wd=weekDates();out.push(ORDER.map(function(d){var dn=S.log.some(function(L){return L.done&&L.d===wd[d]});return WD[d]+' '+(SCHED[d]||'·')+(dn?'✓':'')}).join('  '))}
+  else if(c==='pr'){var best={};ch.forEach(function(b){Object.keys(b.L.ex).forEach(function(id){var e=b.L.ex[id];if(EX[id]&&e.s.some(function(v){return v===1})&&(!best[id]||e.w>best[id]))best[id]=e.w})});var k=Object.keys(best);out.push(k.length?k.map(function(id){return EX[id].n+' · '+num(best[id])+'kg'}).join('\n'):'нет записей')}
+  else if(c==='chain')out.push(ch.length?ch.slice(-5).reverse().map(function(b){return '0x'+b.h.slice(0,8)+' '+dm(b.L.d)+' '+b.L.t+' '+sp(b.ton)+'kg'}).join('\n'):'chain empty');
+  else if(c==='uptime')out.push(uptime()+'d · max '+Math.max(S.abst.best||0,uptime())+'d');
+  else if(c==='clear'){UI.term=[];UI.phase='done';render();return}
+  else out.push('command not found: '+esc(c)+' · type help');
+  UI.term=UI.term.concat(out).slice(-60);UI.phase='done';render();
+  var i=document.getElementById('ti');if(i)i.focus({preventScroll:true});
 }
 
 function ensure(t){var cur=current();if(cur)return cur;cur={d:today(),t:t,ex:{},done:false};S.log.push(cur);return cur}
@@ -271,31 +396,34 @@ function timer(sec){end=Date.now()+sec*1000;rang=false;var el=document.getElemen
 function stop(){clearInterval(iv);document.getElementById('timer').hidden=true}
 async function awake(){try{if(!lock&&navigator.wakeLock){lock=await navigator.wakeLock.request('screen');lock.addEventListener('release',function(){lock=null})}}catch(e){}}
 
+document.addEventListener('submit',function(ev){if(ev.target.id==='tf'){ev.preventDefault();cmd(document.getElementById('ti').value)}});
 document.addEventListener('click',function(ev){
   var b=ev.target.closest('[data-a]');if(!b)return;var a=b.dataset.a;
-  if(a==='tab'){UI.tab=b.dataset.t;try{localStorage.setItem(KEY+'.tab',UI.tab)}catch(e){}render();window.scrollTo(0,0);return}
-  if(a==='pk'){if(!current()){UI.pick=b.dataset.t;render()}return}
-  if(a==='sd'){var d=+b.dataset.d,c=S.sched[d],nx=c==='A'?'B':c==='B'?'C':c==='C'?null:'A';if(nx)S.sched[d]=nx;else delete S.sched[d];save();render();return}
-  if(a==='bar'){UI.sel=+b.dataset.i;render();return}
+  if(a==='tab'){if(document.activeElement)document.activeElement.blur();UI.tab=b.dataset.t;try{localStorage.setItem(KEY+'.tab',UI.tab)}catch(e){}top0();if(UI.tab==='ledger')boot();else render();return}
+  if(a==='off'){UI.off=true;render();return}
+  if(a==='bar'){UI.sel=+b.dataset.i;UI.phase='done';render();return}
   if(a==='s'||a==='c'){
-    var t=current()?current().t:(UI.pick||dayType()),cur=ensure(t),idx=S.log.length-1,x=PLAN[cur.t].find(function(q){return q.id===b.dataset.x}),p=rx(x,idx);
+    var se=session();if(se.mode!=='live'&&se.mode!=='ready')return;
+    var cur=ensure(se.t),idx=S.log.length-1,x=PLAN[cur.t].find(function(q){return q.id===b.dataset.x}),p=rx(x,idx);
     var e=cur.ex[x.id]||(cur.ex[x.id]={w:p.w,s:[]});
     if(a==='c'){var nw=+(p.w+x.st*(+b.dataset.d)).toFixed(1);if(nw>=x.st){e.cal=nw;e.w=nw}save();render();return}
     var i=+b.dataset.i,v=e.s[i];e.w=p.w;e.s[i]=v===1?0:v===0?null:1;
-    var fin=finishIfDone(cur);if(fin)UI.pick=null;save();render();
-    if(fin){stop();window.scrollTo({top:0,behavior:'smooth'})}else if(e.s[i]!==null)timer(x.rest);
+    var fin=finishIfDone(cur);if(fin)UI.off=false;save();render();
+    if(fin){stop();top0(true)}else if(e.s[i]!==null)timer(x.rest);
     return;
   }
   if(a==='ab'){
     if(!UI.armed){UI.armed=1;render();setTimeout(function(){UI.armed=0;render()},3000);return}
-    var ad=Math.max(0,days(S.abst.start,today()));S.abst.best=Math.max(S.abst.best||0,ad);S.abst.start=today();UI.armed=0;save();render();return;
+    var ad=uptime();S.abst.best=Math.max(S.abst.best||0,ad);S.abst.start=today();UI.armed=0;save();render();return;
   }
   if(a==='tm'){end-=15000;tick();return}
   if(a==='tp'){end+=15000;tick();return}
   if(a==='ts'){stop();return}
 });
-document.addEventListener('visibilitychange',function(){if(!document.hidden)render()});
-render();
+document.addEventListener('dblclick',function(e){e.preventDefault()},{passive:false});
+document.addEventListener('gesturestart',function(e){e.preventDefault()},{passive:false});
+document.addEventListener('visibilitychange',function(){if(!document.hidden&&!(document.activeElement&&document.activeElement.id==='ti')){UI.phase=UI.phase==='boot'?'boot':'done';if(UI.phase!=='boot')render()}});
+if(UI.tab==='ledger')boot();else render();
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(function(r){r.update()}).catch(function(){});
 })();
 </script>
