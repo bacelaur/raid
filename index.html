@@ -127,8 +127,13 @@ svg{display:block;width:100%;overflow:visible}
 .timer .b button{border:1px solid var(--ink);padding:8px 10px;font-size:12px}
 .timer.go{background:var(--red);color:#fff}
 .timer.go .b button{border-color:#fff}
+.lib{display:flex;flex-direction:column;gap:6px;text-align:left;width:100%}
+.lib .lt{font:600 22px/1.1 var(--disp);color:var(--bone)}
+.how{border-top:1px solid rgb(var(--bone-rgb) / .08);padding-top:12px;display:flex;flex-direction:column;gap:6px}
+.how .hn{font:500 15px/1.25 var(--disp);color:var(--bone)}
+.how .ht{font-size:13px;line-height:1.55;color:var(--muted)}
 nav{background:var(--ink);border-top:1px solid var(--edge-t);padding:0 max(14px,env(safe-area-inset-right)) max(6px,calc(env(safe-area-inset-bottom) - 14px)) max(14px,env(safe-area-inset-left))}
-nav .in{max-width:540px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr}
+nav .in{max-width:540px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr 1fr}
 nav button{height:48px;font:500 10px var(--body);letter-spacing:.26em;text-transform:uppercase;color:var(--dim)}
 nav button.on{color:var(--bone)}
 @media (prefers-reduced-motion:reduce){.caret,.anim .grow,.anim .draw,.anim .fade,.anim.fade{animation:none;stroke-dashoffset:0}}
@@ -141,7 +146,7 @@ nav button.on{color:var(--bone)}
     <div><div class="l" id="tl">cooldown</div><div class="t" id="tt">2:30</div></div>
     <div class="b"><button data-a="tm">−15</button><button data-a="tp">+15</button><button data-a="ts">×</button></div>
   </div></div>
-  <nav><div class="in"><button data-a="tab" data-t="grind">Grind</button><button data-a="tab" data-t="ledger">Ledger</button></div></nav>
+  <nav><div class="in"><button data-a="tab" data-t="grind">Grind</button><button data-a="tab" data-t="index">Index</button><button data-a="tab" data-t="ledger">Ledger</button></div></nav>
 </footer>
 <script>
 (function(){
@@ -208,6 +213,43 @@ var PLAN={
 };
 var EX={};Object.keys(PLAN).forEach(function(t){PLAN[t].forEach(function(x){EX[x.id]=x})});
 var WD=['ВС','ПН','ВТ','СР','ЧТ','ПТ','СБ'],ORDER=[1,2,3,4,5,6,0];
+var HOW={
+  squat:'Штанга на трапециях, стопы на ширине плеч. Садись до параллели бедра с полом, колени по носкам, спина прямая. Вставай через пятки.',
+  bench:'Лопатки сведены, стопы в пол. Опускай гриф к низу груди, локти под 45°. Жми вверх, таз не отрывай.',
+  row:'Наклон ~45°, спина прямая, колени чуть согнуты. Тяни гриф к низу живота, своди лопатки, опускай подконтрольно.',
+  dbpress:'Сидя со спинкой, гантели у плеч. Жми вверх до почти прямых рук, опускай до уровня ушей.',
+  curl:'Локти прижаты к корпусу. Поднимай с разворотом ладоней вверх, без раскачки. Вниз — 2 секунды.',
+  pushdown:'Локти прижаты, корпус чуть вперёд. Разгибай до прямых рук, вверх — до 90° в локте.',
+  rdl:'Гриф у бёдер, колени чуть согнуты. Отводи таз назад, гриф скользит по ногам до середины голени, спина прямая. Вставай ягодицами.',
+  incline:'Скамья 30°. Опускай гантели к верху груди, локти под 45°. Жми вверх со сведением.',
+  pulldown:'Хват чуть шире плеч. Тяни к верху груди, грудь вперёд, локти вниз. Без раскачки.',
+  lunge:'Шаг вперёд, колено задней ноги почти касается пола, корпус вертикально. Отталкивайся пяткой передней ноги. Повторы — на каждую ногу.',
+  hammer:'Ладони смотрят друг на друга, локти неподвижны. Без рывка.',
+  french:'Лёжа, гриф над лбом. Сгибай только в локтях, плечи неподвижны. Разгибай до прямых рук.',
+  legpress:'Стопы на ширине плеч в центре платформы. Опускай до 90° в коленях, поясница прижата. Колени в замок не выпрямляй.',
+  dbbench:'Лопатки сведены. Опускай гантели до уровня груди, жми вверх с лёгким сведением.',
+  cablerow:'Спина прямая. Тяни рукоять к животу, своди лопатки. Корпус не отклоняй назад.',
+  lateral:'Лёгкий наклон вперёд, локти чуть согнуты. Поднимай до уровня плеч, ведёт локоть.',
+  ezcurl:'Хват на изгибах грифа, локти у корпуса. Без раскачки.',
+  calf:'Подъём на носки до упора, пауза 1 сек вверху, вниз — с растяжкой.',
+  cablecurl:'Стоя у нижнего блока, локти прижаты. Полная амплитуда, сжатие вверху.',
+  ropepush:'Канат, локти прижаты. Внизу разводи концы каната в стороны.',
+  conccurl:'Сидя, локоть упирается во внутреннюю часть бедра. Медленно вверх, пауза, медленно вниз. Повторы — на каждую руку.',
+  ohext:'Гантель двумя руками за головой, локти смотрят вверх. Разгибай до прямых рук.',
+  crunch:'На коленях у верхнего блока, канат у головы. Скручивайся грудью к тазу, бёдра неподвижны.',
+  arnold:'Старт — гантели у лица ладонями к себе. Жми вверх, разворачивая ладони вперёд.',
+  facepull:'Канат на уровне лица. Тяни к лицу, разводя руки, локти высоко.',
+  rdelt:'Наклон почти параллельно полу. Разводи гантели в стороны локтями, лопатки не своди.',
+  shrug:'Гантели по бокам. Плечи прямо вверх к ушам, пауза 1 сек. Без вращения.',
+  pullover:'Стоя у верхнего блока, руки почти прямые. Тяни рукоять дугой к бёдрам спиной.',
+  machpress:'Ручки на уровне середины груди. Жми, локти в замок не выпрямляй.',
+  cablefly:'Шаг вперёд, локти чуть согнуты. Своди руки дугой перед грудью, пауза, медленно назад.',
+  spidercurl:'Грудью на наклонной скамье, руки висят. Сгибай без участия плеч.',
+  kickback:'Наклон, плечо параллельно полу. Разгибай руку назад до прямой, плечо неподвижно.',
+  cardio:'Пульс 120–140: можешь говорить, но не петь.',
+  swim:'Свободный темп без остановок.',
+  stretch:'Каждое положение 30–60 секунд, без рывков.'
+};
 
 function pad(n){return String(n).padStart(2,'0')}
 function key(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
@@ -228,7 +270,7 @@ function top0(smooth){window.scrollTo({top:0,behavior:smooth?'smooth':'auto'})}
 var S;try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 if(!S||!S.log)S={log:[],abst:{start:today(),best:0}};
 var UI={tab:'grind',armed:0,sel:-1,off:false,phase:'done',term:[]};
-try{var tb=localStorage.getItem(KEY+'.tab');UI.tab=tb==='ledger'?'ledger':'grind'}catch(e){}
+try{var tb=localStorage.getItem(KEY+'.tab');UI.tab=tb==='ledger'||tb==='index'?tb:'grind'}catch(e){}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 
 /* незакрытая тренировка прошлого дня закрывается: неотмеченное = провал */
@@ -264,6 +306,7 @@ function tname(t){return NAME[t]||('Legacy '+t)}
 function session(){
   var cur=current();if(cur)return {t:cur.t,mode:'live'};
   var w=new Date().getDay();
+  var ov=S.ov;if(ov&&ov.d===today()&&ov.at===S.log.length&&PLAN[ov.t])return {t:ov.t,mode:'ready',ov:1};
   if(doneToday()){var n=nextSlot(1);return {t:n.t,mode:'next',n:n}}
   return {t:SCHED[w],mode:'ready'};
 }
@@ -273,7 +316,7 @@ function render(){
   var ad=uptime();
   var h='<div class="bar-top"><span class="wm">BACELAUR</span><span class="up">uptime <b>'+ad+'d</b>'+(S.abst.best>ad?' · max '+S.abst.best:'')+
     '<button data-a="ab" class="'+(UI.armed?'arm':'')+'">'+(UI.armed?'confirm':'reset')+'</button></span></div>';
-  h+=UI.tab==='ledger'?ledger():grind();
+  h+=UI.tab==='ledger'?ledger():UI.tab==='index'?index():grind();
   document.getElementById('app').innerHTML=h;
   var o=document.getElementById('tout');if(o)o.scrollTop=o.scrollHeight;
 }
@@ -296,7 +339,7 @@ function grind(){
   h+='<section class="plate"><div class="eb">schedule · week</div><div class="week">'+ORDER.map(function(d){
       var t=SCHED[d],dn=S.log.some(function(L){return L.done&&L.d===wd[d]});
       return '<div class="wd'+(t?'':' off')+(d===w?' now':'')+(dn?' done':'')+'"><small>'+WD[d]+'</small><span>'+(dn?'✓':(t||'·'))+'</span></div>'}).join('')+'</div>';
-  var lbl=se.mode==='live'?'grinding now':se.mode==='ready'?'today':se.mode==='rest'?'rest day · next '+WD[se.n.d]:'next · '+WD[se.n.d];
+  var lbl=se.mode==='live'?'grinding now':se.mode==='ready'?(se.ov?'today · override':'today'):se.mode==='rest'?'rest day · next '+WD[se.n.d]:'next · '+WD[se.n.d];
   h+='<div class="today"><span class="eb">'+lbl+'</span><br>'+NAME[se.t]+'<small>'+FOCUS[se.t]+'</small></div></section>';
 
 
@@ -311,6 +354,25 @@ function grind(){
     h+='</section>';
   });
   if(active)h+='<div class="mono" style="padding:6px 4px;line-height:1.8">✓ valid tx — все повторы чисто · 2-й тап ✗ failed<br>все ✓ → следующий блок тяжелее</div>';
+  return h;
+}
+
+/* ---------- index: все сессии, техника, применить на сегодня ---------- */
+function index(){
+  var se=session(),cur=current(),w=new Date().getDay();
+  var h='<section class="plate"><div class="mono">root@bacelaur:~$ <b>ls ./protocols</b><span class="caret"></span></div>'+
+        '<div class="eb">7 сессий · тап — техника · apply — сделать её сегодня</div></section>';
+  ORDER.map(function(d){return SCHED[d]}).forEach(function(t){
+    var d=ORDER.filter(function(x){return SCHED[x]===t})[0],open=UI.open===t,isToday=se.t===t&&(se.mode==='ready'||se.mode==='live');
+    h+='<section class="plate"><button class="lib" data-a="lib" data-t="'+t+'"><span class="eb">'+WD[d]+(HEAVY[t]?' · heavy':t==='R'?' · recovery':' · pump')+(isToday?' · <b>today</b>':'')+'</span>'+
+       '<span class="lt">'+NAME[t]+'</span><span class="today"><small>'+FOCUS[t].replace(/^(heavy|pump) · /,'')+'</small></span><span class="eb">'+(open?'− close':'+ '+PLAN[t].length+' exercises')+'</span></button>';
+    if(open){
+      PLAN[t].forEach(function(x,k){var p=rx(x,S.log.length);
+        h+='<div class="how"><div class="hd"><span class="eb">'+pad(k+1)+'</span><span class="eb"><b>'+(x.tag?x.tag:num(p.w)+' kg'+(x.db?' ×2':'')+' · '+x.s+'×'+x.r)+'</b></span></div><div class="hn">'+x.n+'</div><div class="ht">'+(HOW[x.id]||'')+'</div></div>'});
+      h+=isToday?'<div class="mono">> уже стоит на сегодня</div>':cur?'<div class="mono">> сначала закрой текущую сессию</div>':'<button class="ghost" data-a="apply" data-t="'+t+'">apply today →</button>';
+    }
+    h+='</section>';
+  });
   return h;
 }
 
@@ -433,6 +495,8 @@ document.addEventListener('click',function(ev){
   var b=ev.target.closest('[data-a]');if(!b)return;var a=b.dataset.a;
   if(a==='tab'){if(document.activeElement)document.activeElement.blur();UI.tab=b.dataset.t;try{localStorage.setItem(KEY+'.tab',UI.tab)}catch(e){}top0();if(UI.tab==='ledger')boot();else render();return}
   if(a==='off'){UI.off=true;render();return}
+  if(a==='lib'){UI.open=UI.open===b.dataset.t?null:b.dataset.t;render();return}
+  if(a==='apply'){if(current())return;S.ov={d:today(),t:b.dataset.t,at:S.log.length};save();UI.open=null;UI.tab='grind';try{localStorage.setItem(KEY+'.tab','grind')}catch(e){}top0();render();return}
   if(a==='bar'){UI.sel=+b.dataset.i;UI.phase='done';render();return}
   if(a==='s'||a==='c'){
     var se=session();if(se.mode!=='live'&&se.mode!=='ready')return;
