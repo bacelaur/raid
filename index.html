@@ -296,7 +296,7 @@ document.addEventListener('click',function(ev){
 });
 document.addEventListener('visibilitychange',function(){if(!document.hidden)render()});
 render();
-if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(function(r){r.update()}).catch(function(){});
 })();
 </script>
 </body>
