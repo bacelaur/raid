@@ -32,7 +32,7 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 /* Каркас без position:fixed: прокручивается только #scroll, нижняя панель стоит в потоке — на iOS home screen она не прыгает. */
 html{height:100%;overflow:hidden;touch-action:manipulation;background:var(--ink)}
-body{position:fixed;top:0;right:0;bottom:0;left:0;margin:0;overflow:hidden;touch-action:manipulation;display:flex;flex-direction:column;color:var(--bone);font:14px/1.5 var(--body);-webkit-font-smoothing:antialiased;-webkit-user-select:none;user-select:none;
+body{position:fixed;top:0;right:0;left:0;height:100vh;height:100lvh;height:var(--app-h,100lvh);margin:0;overflow:hidden;touch-action:manipulation;display:flex;flex-direction:column;color:var(--bone);font:14px/1.5 var(--body);-webkit-font-smoothing:antialiased;-webkit-user-select:none;user-select:none;
   background:radial-gradient(130% 70% at 50% 0%,#0c0c10 0%,#07070a 46%,#050506 100%) var(--ink)}
 #scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
 footer{flex:none}
@@ -148,9 +148,13 @@ nav button.on{color:var(--bone)}
 'use strict';
 var KEY='raid.v2';
 /* Фулл-бади 3 раза в неделю: каждая сессия — ноги + жим + тяга + плечи + руки. */
-var SCHED={1:'A',3:'B',5:'C'};
-var NAME={A:'Full Body A',B:'Full Body B',C:'Full Body C'};
-var FOCUS={A:'присед · жим лёжа · тяга штанги',B:'румынская тяга · наклонный жим · верхний блок',C:'жим ногами · жим гантелей · горизонтальная тяга'};
+/* Каждый день своя сессия. Тяжёлый фулл-бади ПН/СР/ПТ — основа роста; между ними памп без тяжёлой базы,
+   чтобы ноги и спина восстанавливались к следующему фулл-бади; ВС — восстановление. */
+var SCHED={1:'A',2:'D',3:'B',4:'E',5:'C',6:'F',0:'R'};
+var HEAVY={A:1,B:1,C:1};
+var NAME={A:'Full Body A',B:'Full Body B',C:'Full Body C',D:'Pump · Arms',E:'Pump · Shoulders',F:'Pump · Chest',R:'Recovery'};
+var FOCUS={A:'heavy · присед · жим лёжа · тяга штанги',B:'heavy · румынская тяга · наклонный жим · верхний блок',C:'heavy · жим ногами · жим гантелей · горизонтальная тяга',
+  D:'pump · бицепс · трицепс · пресс',E:'pump · плечи · задняя дельта · трапеции',F:'pump · грудь · руки',R:'кардио · бассейн · растяжка'};
 var PLAN={
   A:[
     {id:'squat',n:'Присед со штангой',s:3,r:8,rest:150,w0:40,st:2.5},
@@ -175,6 +179,31 @@ var PLAN={
     {id:'lateral',n:'Махи гантелями в стороны',s:3,r:15,rest:75,w0:5,st:1,db:1},
     {id:'ezcurl',n:'Сгибания со штангой',s:2,r:12,rest:90,w0:15,st:2.5},
     {id:'calf',n:'Подъёмы на носки',s:3,r:15,rest:75,w0:30,st:2.5}
+  ],
+  D:[
+    {id:'cablecurl',n:'Сгибания на нижнем блоке',s:3,r:15,rest:75,w0:10,st:2.5},
+    {id:'ropepush',n:'Разгибания с канатом',s:3,r:15,rest:75,w0:12.5,st:2.5},
+    {id:'conccurl',n:'Концентрированные сгибания',s:3,r:12,rest:60,w0:6,st:1},
+    {id:'ohext',n:'Разгибание гантели из-за головы',s:3,r:12,rest:75,w0:10,st:1},
+    {id:'crunch',n:'Скручивания на блоке',s:3,r:15,rest:60,w0:20,st:2.5}
+  ],
+  E:[
+    {id:'arnold',n:'Жим Арнольда',s:3,r:12,rest:90,w0:6,st:1,db:1},
+    {id:'facepull',n:'Тяга каната к лицу',s:3,r:15,rest:75,w0:15,st:2.5},
+    {id:'rdelt',n:'Обратные махи в наклоне',s:3,r:15,rest:60,w0:4,st:1,db:1},
+    {id:'shrug',n:'Шраги с гантелями',s:3,r:12,rest:75,w0:14,st:2,db:1},
+    {id:'pullover',n:'Пуловер на верхнем блоке',s:3,r:12,rest:75,w0:20,st:2.5}
+  ],
+  F:[
+    {id:'machpress',n:'Жим в тренажёре на грудь',s:3,r:12,rest:90,w0:30,st:2.5},
+    {id:'cablefly',n:'Сведения в кроссовере',s:3,r:15,rest:75,w0:10,st:2.5},
+    {id:'spidercurl',n:'Сгибания на наклонной скамье',s:3,r:12,rest:75,w0:6,st:1,db:1},
+    {id:'kickback',n:'Разгибания в наклоне',s:3,r:15,rest:60,w0:5,st:1,db:1}
+  ],
+  R:[
+    {id:'cardio',n:'Кардио: дорожка в горку или велосипед',s:1,r:1,rest:0,tag:'20 мин'},
+    {id:'swim',n:'Бассейн',s:1,r:1,rest:0,tag:'20 мин'},
+    {id:'stretch',n:'Растяжка: грудь, плечи, бёдра',s:1,r:1,rest:0,tag:'10 мин'}
   ]
 };
 var EX={};Object.keys(PLAN).forEach(function(t){PLAN[t].forEach(function(x){EX[x.id]=x})});
@@ -191,6 +220,9 @@ function sp(n){return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g,' ')
 function dm(k){return k.slice(8)+'.'+k.slice(5,7)}
 function esc(s){return String(s).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]})}
 var SC=document.getElementById('scroll');
+/* iOS home screen: высота окна иногда меньше экрана — берём реальную высоту экрана, чтобы нижняя панель стояла у края */
+function fitH(){var h=(navigator.standalone||matchMedia('(display-mode: standalone)').matches)?Math.max(screen.height,window.innerHeight):window.innerHeight;document.documentElement.style.setProperty('--app-h',h+'px')}
+fitH();window.addEventListener('resize',fitH);window.addEventListener('orientationchange',function(){setTimeout(fitH,300)});
 function top0(smooth){SC.scrollTo({top:0,behavior:smooth?'smooth':'auto'})}
 
 var S;try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
@@ -212,6 +244,7 @@ function passed(x,e){for(var i=0;i<x.s;i++)if(e.s[i]!==1)return false;return tru
 function rnd(v,st){return Math.max(st,Math.round(v/st)*st)}
 /* законы веса: закрыл всё → +шаг; провал → тот же; два провала подряд → −10% */
 function rx(x,idx){
+  if(x.tag)return {w:null,why:'recovery · без веса'};
   var cur=idx<S.log.length?S.log[idx].ex[x.id]:null;
   if(cur&&typeof cur.cal==='number')return {w:cur.cal,why:'manual override'};
   var h=hist(x.id,idx);
@@ -220,7 +253,7 @@ function rx(x,idx){
   if(h[1]&&!passed(x,h[1])&&h[1].w===h[0].w)return {w:rnd(h[0].w*.9,x.st),why:'2× tx failed · rollback −10%',dn:1};
   return {w:h[0].w,why:'prev tx failed · retry same weight'};
 }
-function tonnage(L){var t=0;Object.keys(L.ex).forEach(function(id){var x=EX[id],e=L.ex[id];if(!x)return;e.s.forEach(function(v){if(v===1)t+=e.w*(x.db?2:1)*x.r})});return t}
+function tonnage(L){var t=0;Object.keys(L.ex).forEach(function(id){var x=EX[id],e=L.ex[id];if(!x||x.tag||!e.w)return;e.s.forEach(function(v){if(v===1)t+=e.w*(x.db?2:1)*x.r})});return t}
 function sets(L){var ok=0,all=0;Object.keys(L.ex).forEach(function(id){L.ex[id].s.forEach(function(v){if(v===1||v===0)all++;if(v===1)ok++})});return {ok:ok,all:all}}
 function chain(){var prev='0000000000000000',out=[];S.log.forEach(function(L,i){if(!L.done)return;var h=fnv(prev+L.d+L.t+JSON.stringify(L.ex))+fnv(L.d+prev+i);out.push({i:i,L:L,h:h,p:prev,ton:tonnage(L),s:sets(L)});prev=h});return out}
 function weekDates(){var d=new Date(),w=(d.getDay()+6)%7;d.setDate(d.getDate()-w);var out={};for(var i=0;i<7;i++){out[(i+1)%7]=key(d);d.setDate(d.getDate()+1)}return out}
@@ -232,8 +265,7 @@ function session(){
   var cur=current();if(cur)return {t:cur.t,mode:'live'};
   var w=new Date().getDay();
   if(doneToday()){var n=nextSlot(1);return {t:n.t,mode:'next',n:n}}
-  if(SCHED[w])return {t:SCHED[w],mode:'ready'};
-  var n2=nextSlot(1);return {t:n2.t,mode:UI.off?'ready':'rest',n:n2};
+  return {t:SCHED[w],mode:'ready'};
 }
 
 function render(){
@@ -271,9 +303,9 @@ function grind(){
   var active=se.mode==='live'||se.mode==='ready';
   plan.forEach(function(x,k){
     var p=rx(x,idx),e=cur&&cur.ex[x.id],started=e&&e.s.some(function(v){return v===1||v===0});
-    h+='<section class="plate ex"><div class="hd"><span class="eb">'+pad(k+1)+' / '+pad(plan.length)+'</span><span class="eb">cooldown '+Math.floor(x.rest/60)+':'+pad(x.rest%60)+'</span></div>'+
-      '<h2>'+x.n+'</h2><div class="rx"><span class="w">'+num(p.w)+'<small>KG'+(x.db?' ×2':'')+'</small></span><span class="r">'+x.s+'×'+x.r+'</span>'+
-      (active&&!started?'<span class="cal"><button data-a="c" data-x="'+x.id+'" data-d="-1" aria-label="легче">−</button><button data-a="c" data-x="'+x.id+'" data-d="1" aria-label="тяжелее">+</button></span>':'')+
+    h+='<section class="plate ex"><div class="hd"><span class="eb">'+pad(k+1)+' / '+pad(plan.length)+'</span>'+(x.rest?'<span class="eb">cooldown '+Math.floor(x.rest/60)+':'+pad(x.rest%60)+'</span>':'')+'</div>'+
+      '<h2>'+x.n+'</h2><div class="rx">'+(x.tag?'<span class="w">'+x.tag+'</span>':'<span class="w">'+num(p.w)+'<small>KG'+(x.db?' ×2':'')+'</small></span><span class="r">'+x.s+'×'+x.r+'</span>')+
+      (active&&!started&&!x.tag?'<span class="cal"><button data-a="c" data-x="'+x.id+'" data-d="-1" aria-label="легче">−</button><button data-a="c" data-x="'+x.id+'" data-d="1" aria-label="тяжелее">+</button></span>':'')+
       '</div><div class="why'+(p.dn?' dn':'')+'">> '+p.why+'</div>';
     if(active){h+='<div class="sets">';for(var i=0;i<x.s;i++){var v=e?e.s[i]:null;h+='<button class="sb'+(v===1?' ok':v===0?' no':'')+'" data-a="s" data-x="'+x.id+'" data-i="'+i+'">'+(v===1?'✓':v===0?'✗':(i+1))+'</button>'}h+='</div>'}
     h+='</section>';
@@ -289,12 +321,12 @@ function ledger(){
   if(UI.phase==='boot')return h;
   var an=UI.phase==='anim'?' anim':'';
   var tot=0,ok=0,all=0;ch.forEach(function(b){tot+=b.ton;ok+=b.s.ok;all+=b.s.all});
-  var wd=weekDates(),wk=ch.filter(function(b){return b.L.d>=wd[1]}).length;
+  var wd=weekDates(),wk=ch.filter(function(b){return b.L.d>=wd[1]&&HEAVY[b.L.t]}).length;
   h+='<section class="plate'+an+(an?' fade':'')+'"><div class="eb">network stats</div><div class="kpi">'+
      '<div><div class="v">'+n+'</div><div class="eb">blocks</div></div>'+
      '<div><div class="v">'+(tot>=10000?num((tot/1000).toFixed(1))+'<small>t</small>':sp(tot)+'<small>kg</small>')+'</div><div class="eb">tonnage</div></div>'+
      '<div><div class="v">'+(all?Math.round(ok/all*100):0)+'<small>%</small></div><div class="eb">tx valid</div></div>'+
-     '<div><div class="v">'+wk+'<small>/ 3</small></div><div class="eb">this week</div></div></div></section>';
+     '<div><div class="v">'+wk+'<small>/ 3</small></div><div class="eb">full body / week</div></div></div></section>';
 
   /* тоннаж по блокам, включая текущий незакрытый */
   var bars=ch.slice(-16).map(function(b){return {i:b.i,ton:b.ton,ok:b.s.ok===b.s.all,L:b.L,pend:false}});
@@ -409,7 +441,7 @@ document.addEventListener('click',function(ev){
     if(a==='c'){var nw=+(p.w+x.st*(+b.dataset.d)).toFixed(1);if(nw>=x.st){e.cal=nw;e.w=nw}save();render();return}
     var i=+b.dataset.i,v=e.s[i];e.w=p.w;e.s[i]=v===1?0:v===0?null:1;
     var fin=finishIfDone(cur);if(fin)UI.off=false;save();render();
-    if(fin){stop();top0(true)}else if(e.s[i]!==null)timer(x.rest);
+    if(fin){stop();top0(true)}else if(e.s[i]!==null&&x.rest)timer(x.rest);
     return;
   }
   if(a==='ab'){

@@ -1,4 +1,4 @@
-const V = 'raid-v6';
+const V = 'raid-v8';
 const FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-180.png', 'icon-512.png',
   'fonts/clash-display-500.woff2', 'fonts/clash-display-600.woff2', 'fonts/general-sans-400.woff2',
   'fonts/general-sans-500.woff2', 'fonts/manrope-cyrillic-variable.woff2', 'fonts/unbounded-cyrillic-variable.woff2'];
