@@ -283,6 +283,11 @@ function grind(){
   var ch=chain(),last=ch[ch.length-1],prev=last?last.h:'0000000000000000';
   var marked=0,total=0;plan.forEach(function(x){total+=x.s;var e=cur&&cur.ex[x.id];if(e)e.s.forEach(function(v){if(v===1||v===0)marked++})});
   var h='';
+  h+='<section class="plate hero"><div class="mono">root@bacelaur:~$ <b>./grind --height '+(ch.length+1)+' --sig '+se.t.toLowerCase()+'</b><span class="caret"></span></div>'+
+     '<h1>BACELAUR<span>'+hex(ch.length+1)+'</span></h1>'+
+     '<div class="meta eb"><span>status <b>'+(se.mode==='live'?'grinding':se.mode==='ready'?'awaiting tx':'locked')+'</b></span><span>prev <b>0x'+prev.slice(0,6)+'…'+prev.slice(-4)+'</b></span><span>tx <b>'+marked+'/'+total+'</b></span></div>'+
+     '<div class="prog"><i style="width:'+(marked/total*100)+'%"></i></div>'+
+     (se.mode==='rest'?'<button class="ghost" data-a="off">grind anyway →</button>':'')+'</section>';
   if(se.mode==='next'&&last){
     h+='<section class="plate okp"><div class="eb">[ ok ] block confirmed · '+dm(last.L.d)+'</div><div class="t">BACELAUR '+hex(ch.length)+'</div>'+
        '<div class="mono">hash <b>0x'+last.h+'</b><br>'+tname(last.L.t)+' · <b>'+sp(last.ton)+' kg</b> · '+last.s.ok+'/'+last.s.all+' tx valid</div></section>';
@@ -294,11 +299,6 @@ function grind(){
   var lbl=se.mode==='live'?'grinding now':se.mode==='ready'?'today':se.mode==='rest'?'rest day · next '+WD[se.n.d]:'next · '+WD[se.n.d];
   h+='<div class="today"><span class="eb">'+lbl+'</span><br>'+NAME[se.t]+'<small>'+FOCUS[se.t]+'</small></div></section>';
 
-  h+='<section class="plate hero"><div class="mono">root@bacelaur:~$ <b>./grind --height '+(ch.length+1)+' --sig '+se.t.toLowerCase()+'</b><span class="caret"></span></div>'+
-     '<h1>BACELAUR<span>'+hex(ch.length+1)+'</span></h1>'+
-     '<div class="meta eb"><span>status <b>'+(se.mode==='live'?'grinding':se.mode==='ready'?'awaiting tx':'locked')+'</b></span><span>prev <b>0x'+prev.slice(0,6)+'…'+prev.slice(-4)+'</b></span><span>tx <b>'+marked+'/'+total+'</b></span></div>'+
-     '<div class="prog"><i style="width:'+(marked/total*100)+'%"></i></div>'+
-     (se.mode==='rest'?'<button class="ghost" data-a="off">grind anyway →</button>':'')+'</section>';
 
   var active=se.mode==='live'||se.mode==='ready';
   plan.forEach(function(x,k){
