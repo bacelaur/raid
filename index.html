@@ -31,8 +31,8 @@
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 /* Каркас без position:fixed: прокручивается только #scroll, нижняя панель стоит в потоке — на iOS home screen она не прыгает. */
-html,body{height:100%;margin:0;overflow:hidden;touch-action:manipulation;background:var(--ink)}
-body{display:flex;flex-direction:column;color:var(--bone);font:14px/1.5 var(--body);-webkit-font-smoothing:antialiased;-webkit-user-select:none;user-select:none;
+html{height:100%;overflow:hidden;touch-action:manipulation;background:var(--ink)}
+body{position:fixed;top:0;right:0;bottom:0;left:0;margin:0;overflow:hidden;touch-action:manipulation;display:flex;flex-direction:column;color:var(--bone);font:14px/1.5 var(--body);-webkit-font-smoothing:antialiased;-webkit-user-select:none;user-select:none;
   background:radial-gradient(130% 70% at 50% 0%,#0c0c10 0%,#07070a 46%,#050506 100%) var(--ink)}
 #scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
 footer{flex:none}
@@ -127,9 +127,9 @@ svg{display:block;width:100%;overflow:visible}
 .timer .b button{border:1px solid var(--ink);padding:8px 10px;font-size:12px}
 .timer.go{background:var(--red);color:#fff}
 .timer.go .b button{border-color:#fff}
-nav{background:var(--ink);border-top:1px solid var(--edge-t);padding:0 max(14px,env(safe-area-inset-right)) env(safe-area-inset-bottom) max(14px,env(safe-area-inset-left))}
+nav{background:var(--ink);border-top:1px solid var(--edge-t);padding:0 max(14px,env(safe-area-inset-right)) max(6px,calc(env(safe-area-inset-bottom) - 14px)) max(14px,env(safe-area-inset-left))}
 nav .in{max-width:540px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr}
-nav button{height:54px;font:500 10px var(--body);letter-spacing:.26em;text-transform:uppercase;color:var(--dim)}
+nav button{height:48px;font:500 10px var(--body);letter-spacing:.26em;text-transform:uppercase;color:var(--dim)}
 nav button.on{color:var(--bone)}
 @media (prefers-reduced-motion:reduce){.caret,.anim .grow,.anim .draw,.anim .fade,.anim.fade{animation:none;stroke-dashoffset:0}}
 </style>
